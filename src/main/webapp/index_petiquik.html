@@ -477,13 +477,12 @@
                 return m.request({
                     method: "GET",
                     url: "_ah/api/petiQuik/v1/top4/"
-                })
-                    .then(function (result) {
-                        popularPetitions.list = result.items
-                        console.log("got:", result.items)
-                        // m.redraw(true) 
+                }).then(function (result) {
+                        popularPetitions.list = result.items;
+                        console.log("got:", result.items);
+                        m.redraw(true);
                     })
-            }
+            },
         }
 
         var PopularPetitions = {
@@ -516,12 +515,12 @@
             view: function (vnode) {
                 return m("li", [
                     m(".petition-image", [
-                        m("img", { src: vnode.attrs.image, alt: vnode.attrs.title }),
+                        m("img", { src: vnode.attrs.properties.image, alt: vnode.attrs.title }),
                     ]),
                     m(".petition-content", [
-                        m("h3", vnode.attrs.title),
+                        m("h3", vnode.attrs.properties.Body),
                         m("p", vnode.attrs.description),
-                        m("div.signature-count", vnode.attrs.signatures + " signataires"),
+                        m("div.signature-count", vnode.attrs.properties.nbvotants + " signataires"),
                     ]),
                     m(".sign", [
                         m("a", { class: "button-small", href: "index_petiquik.html#!/petitions" }, "Signer"),

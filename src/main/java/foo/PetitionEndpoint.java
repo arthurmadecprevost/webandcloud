@@ -38,8 +38,8 @@ import com.google.appengine.api.datastore.Transaction;
 
 @Api(name = "petiQuik",
      version = "v1",
-     audiences = "115500541537-rapfqet1t2qmbv79oqc5dcfqdebopj1g.apps.googleusercontent.com",
-  	 clientIds = {"115500541537-rapfqet1t2qmbv79oqc5dcfqdebopj1g.apps.googleusercontent.com"},
+     audiences = "",
+  	 clientIds = {""},
      namespace =
      @ApiNamespace(
 		   ownerDomain = "helloworld.example.com",
