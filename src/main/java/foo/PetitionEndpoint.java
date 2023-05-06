@@ -36,7 +36,7 @@ import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Transaction;
 
-@Api(name = "PetiQuik",
+@Api(name = "petiQuik",
      version = "v1",
      audiences = "115500541537-rapfqet1t2qmbv79oqc5dcfqdebopj1g.apps.googleusercontent.com",
   	 clientIds = {"115500541537-rapfqet1t2qmbv79oqc5dcfqdebopj1g.apps.googleusercontent.com"},
@@ -49,8 +49,8 @@ import com.google.appengine.api.datastore.Transaction;
      
 public class PetitionEndpoint {
 	
-	@ApiMethod(name = "top", httpMethod = HttpMethod.GET)
-	public List<Entity> top() {
+	@ApiMethod(name = "top4", httpMethod = HttpMethod.GET)
+	public List<Entity> top4() {
 		Query q = new Query("Petition").addSort("nbvotants", SortDirection.DESCENDING);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
