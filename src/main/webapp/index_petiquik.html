@@ -276,6 +276,10 @@
         align-items: center;
         justify-content: center;
     }
+
+    .header-profile:hover {
+        color: #9b9b9b
+    }
 </style>
 
 <body>
@@ -332,9 +336,9 @@
                                 m("button", { type: "submit" }, "Rechercher"),
                             ]),
                         ]),
-                        m("div", { class: "header-profile" }, [
+                        m("a", { class: "header-profile", href: "index_petiquik.html#!/profile" }, [
                             m("img", { class: "profile-pic", src: Login.url }),
-                            m("p", {style: "margin-left:20px"}, Login.name),
+                            m("p", { style: "margin-left:20px" }, Login.name),
                         ]),
                     ]);
                 } else {
@@ -400,30 +404,6 @@
                     ]),
                 ]),
         };
-
-        var popularPetitions = [
-            {
-                title: "Stopper la pollution plastique",
-                description:
-                    "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
-                signatures: 25000,
-                image: "https://picsum.photos/200/150",
-            },
-            {
-                title: "Pour une éducation inclusive",
-                description:
-                    "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
-                signatures: 18000,
-                image: "https://picsum.photos/200/150",
-            },
-            {
-                title: "Sauvons les abeilles",
-                description:
-                    "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
-                signatures: 35000,
-                image: "https://picsum.photos/200/150",
-            },
-        ];
 
         var allPetitions = [
             {
@@ -491,13 +471,29 @@
             },
         ];
 
+        var popularPetitions = {
+            list: [],
+            loadList: function () {
+                return m.request({
+                    method: "GET",
+                    url: "_ah/api/PetiQuik/v1/top4/"
+                })
+                    .then(function (result) {
+                        popularPetitions.list = result.items
+                        console.log("got:", result.items)
+                        // m.redraw(true) 
+                    })
+            }
+        }
+
         var PopularPetitions = {
+            oninit: popularPetitions.loadList,
             view: function () {
                 return m(".petitions", [
                     m("h2", "Pétitions populaires"),
                     m(
                         "ul",
-                        popularPetitions.map(function (petition) {
+                        popularPetitions.list.map(function (petition) {
                             return m(Petition, petition);
                         })
                     ),
@@ -543,7 +539,6 @@
                 ]);
             }
         }
-
 
         var HomePage = {
             view: function () {
