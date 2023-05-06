@@ -1,4 +1,4 @@
-package cloud.project;
+package foo;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,13 +43,13 @@ import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Transaction;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 
-import cloud.project.model.Petition;
-import cloud.project.util.*;
+import foo.model.Petition;
+import foo.util.*;
 
-@Api(name = "myApi",
+@Api(name = "petiQuik",
      version = "v1",
-     audiences = "29840377210-rjvba9f5adbkpo93d83lquo5ater0b5q.apps.googleusercontent.com",
-  	 clientIds = {"29840377210-rjvba9f5adbkpo93d83lquo5ater0b5q.apps.googleusercontent.com"},
+     audiences = "",
+  	 clientIds = {""},
      namespace =
      @ApiNamespace(
 		   ownerDomain = "helloworld.example.com",

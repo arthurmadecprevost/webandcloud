@@ -405,71 +405,19 @@
                 ]),
         };
 
-        var allPetitions = [
-            {
-                title: "Stopper la pollution plastique",
-                description:
-                    "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
-                signatures: 25000,
-                image: "https://picsum.photos/200/150",
+        var allPetitions = {
+            list: [],
+            loadList: function () {
+                return m.request({
+                    method: "GET",
+                    url: "_ah/api/petiQuik/v1/top100/"
+                }).then(function (result) {
+                    allPetitions.list = result.items;
+                    console.log("got:", result.items);
+                    m.redraw(true);
+                })
             },
-            {
-                title: "Pour une éducation inclusive",
-                description:
-                    "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
-                signatures: 18000,
-                image: "https://picsum.photos/200/150",
-            },
-            {
-                title: "Sauvons les abeilles",
-                description:
-                    "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
-                signatures: 35000,
-                image: "https://picsum.photos/200/150",
-            },
-            {
-                title: "Stopper la pollution plastique",
-                description:
-                    "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
-                signatures: 25000,
-                image: "https://picsum.photos/200/150",
-            },
-            {
-                title: "Pour une éducation inclusive",
-                description:
-                    "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
-                signatures: 18000,
-                image: "https://picsum.photos/200/150",
-            },
-            {
-                title: "Sauvons les abeilles",
-                description:
-                    "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
-                signatures: 35000,
-                image: "https://picsum.photos/200/150",
-            },
-            {
-                title: "Stopper la pollution plastique",
-                description:
-                    "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
-                signatures: 25000,
-                image: "https://picsum.photos/200/150",
-            },
-            {
-                title: "Pour une éducation inclusive",
-                description:
-                    "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
-                signatures: 18000,
-                image: "https://picsum.photos/200/150",
-            },
-            {
-                title: "Sauvons les abeilles",
-                description:
-                    "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
-                signatures: 35000,
-                image: "https://picsum.photos/200/150",
-            },
-        ];
+        };
 
         var popularPetitions = {
             list: [],
@@ -478,20 +426,19 @@
                     method: "GET",
                     url: "_ah/api/petiQuik/v1/top4/"
                 }).then(function (result) {
-                        popularPetitions.list = result.items;
-                        console.log("got:", result.items);
-                        m.redraw(true);
-                    })
+                    popularPetitions.list = result.items;
+                    console.log("got:", result.items);
+                    m.redraw(true);
+                })
             },
         }
 
-        var PopularPetitions = {
+        var PopularPetitionsView = {
             oninit: popularPetitions.loadList,
             view: function () {
                 return m(".petitions", [
                     m("h2", "Pétitions populaires"),
-                    m(
-                        "ul",
+                    m("ul",
                         popularPetitions.list.map(function (petition) {
                             return m(Petition, petition);
                         })
@@ -500,11 +447,12 @@
             },
         };
 
-        var AllPetitions = {
+        var AllPetitionsView = {
+            oninit: allPetitions.loadList,
             view: function () {
                 return m(".petitions", [
                     m("h2", "Nos pétitions"),
-                    m("ul", allPetitions.map(function (petition) {
+                    m("ul", allPetitions.list.map(function (petition) {
                         return m(Petition, petition);
                     })),
                 ]);
@@ -515,11 +463,11 @@
             view: function (vnode) {
                 return m("li", [
                     m(".petition-image", [
-                        m("img", { src: vnode.attrs.properties.image, alt: vnode.attrs.title }),
+                        m("img", { src: vnode.attrs.properties.image, alt: vnode.attrs.properties.name }),
                     ]),
                     m(".petition-content", [
-                        m("h3", vnode.attrs.properties.Body),
-                        m("p", vnode.attrs.description),
+                        m("h3", vnode.attrs.properties.name),
+                        m("p", vnode.attrs.properties.description),
                         m("div.signature-count", vnode.attrs.properties.nbvotants + " signataires"),
                     ]),
                     m(".sign", [
@@ -544,7 +492,7 @@
                 return m("body", [
                     m(Header),
                     m(HeroSection),
-                    m(PopularPetitions),
+                    m(PopularPetitionsView),
                     m(Footer)
                 ]);
             },
@@ -554,7 +502,7 @@
             view: function () {
                 return m("body", [
                     m(Header),
-                    m(AllPetitions),
+                    m(AllPetitionsView),
                     m(Footer),
                 ]);
             },

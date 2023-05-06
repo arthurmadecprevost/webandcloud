@@ -47,6 +47,7 @@ public class PetitionServlet extends HttpServlet {
 			e.setProperty("date", new Date());
 			e.setProperty("name", "Pour le retour de Groquik");
             e.setProperty("description", "skjdhfkqjhglkjsqdfjldg lqksj");
+            e.setProperty("image", "https://picsum.photos/200/150");
 			
 			// Create random votants
 			HashSet<String> fset = new HashSet<String>();
