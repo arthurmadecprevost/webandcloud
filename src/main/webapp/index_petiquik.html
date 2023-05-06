@@ -1,507 +1,588 @@
 <html>
 
 <head>
-  <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
-  
-  <title>PetiQuik</title>
+    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+    <title>PetiQuik</title>
 
-  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/2.2.3/mithril.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/2.2.3/mithril.js"></script>
+
+    <script src="https://unpkg.com/jwt-decode/build/jwt-decode.js"></script>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <style>
-  /* reset styles */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+    /* reset styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-  /* global styles */
-  body {
-    font-family: Arial, sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
-    color: #333;
-  }
+    /* global styles */
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        color: #333;
+    }
 
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
 
-  /* header styles */
-  header {
-    display: flex;
-    flex-grow: 1;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
-    align-content: space-evenly;
-    align-items: center;
-    padding: 10px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
+    /* header styles */
+    header {
+        display: flex;
+        flex-grow: 1;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        align-content: space-evenly;
+        align-items: center;
+        padding: 10px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-  .logo {
-    font-size: 20px;
-    font-weight: bold;
-    background-color: #fed500;
-    padding: 10px;
-    padding-left: 20px;
-    padding-right: 20px;
-    border-radius: 9px;
-    max-width: 100%;
-    height: auto;
-    transition: all 0.2s ease-in-out;
-  }
+    .logo {
+        font-size: 20px;
+        font-weight: bold;
+        background-color: #fed500;
+        padding: 10px;
+        padding-left: 20px;
+        padding-right: 20px;
+        border-radius: 9px;
+        max-width: 100%;
+        height: auto;
+        transition: all 0.2s ease-in-out;
+    }
 
-  .logo:hover {
-    background-color: #e2bd00;
-    transition: all 0.2s ease-in-out;
-  }
+    .logo:hover {
+        background-color: #e2bd00;
+        transition: all 0.2s ease-in-out;
+    }
 
-  nav ul {
-    display: flex;
-    list-style-type: none;
-  }
+    nav ul {
+        display: flex;
+        list-style-type: none;
+    }
 
-  nav li {
-    margin-right: 20px;
-  }
+    nav li {
+        margin-right: 20px;
+    }
 
-  nav a {
-    padding: 10px;
-    border-radius: 5px;
-    transition: all 0.2s ease-in-out;
-  }
+    nav a {
+        padding: 10px;
+        border-radius: 5px;
+        transition: all 0.2s ease-in-out;
+    }
 
-  nav a:hover {
-    background-color: #e4be00;
-    transition: all 0.2s ease-in-out;
-  }
+    nav a:hover {
+        background-color: #e4be00;
+        transition: all 0.2s ease-in-out;
+    }
 
-  .search-bar input[type="text"] {
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    margin-right: 10px;
-  }
+    .search-bar input[type="text"] {
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        margin-right: 10px;
+    }
 
-  .search-bar button[type="submit"] {
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    background-color: #fed500;
-    color: #000000;
-  }
+    .search-bar button[type="submit"] {
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #fed500;
+        color: #000000;
+    }
 
-  .search-bar button[type="submit"]:hover {
-    cursor: pointer;
-    background-color: #e4be00;
-    transition: all 0.2s ease-in-out;
-  }
+    .search-bar button[type="submit"]:hover {
+        cursor: pointer;
+        background-color: #e4be00;
+        transition: all 0.2s ease-in-out;
+    }
 
-  /* hero section styles */
-  .hero-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 50px;
-    background-color: #f5f5f5;
-  }
+    /* hero section styles */
+    .hero-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 50px;
+        background-color: #f5f5f5;
+    }
 
-  .hero-content {
-    max-width: 50%;
-  }
+    .hero-content {
+        max-width: 50%;
+    }
 
-  .hero-content h1 {
-    font-size: 32px;
-    margin-bottom: 20px;
-  }
+    .hero-content h1 {
+        font-size: 32px;
+        margin-bottom: 20px;
+    }
 
-  .hero-content p {
-    margin-bottom: 20px;
-  }
+    .hero-content p {
+        margin-bottom: 20px;
+    }
 
-  .button-big {
-    padding: 10px 20px;
-    border: none;
-    font-size: 20px;
-    border-radius: 5px;
-    background-color: #fed500;
-    color: #000;
-    transition: all 0.2s ease-in-out;
-  }
+    .button-big {
+        padding: 10px 20px;
+        border: none;
+        font-size: 20px;
+        border-radius: 5px;
+        background-color: #fed500;
+        color: #000;
+        transition: all 0.2s ease-in-out;
+    }
 
-  .button-big:hover {
-    cursor: pointer;
-    background-color: #e4be00;
-    transition: all 0.2s ease-in-out;
-  }
+    .button-big:hover {
+        cursor: pointer;
+        background-color: #e4be00;
+        transition: all 0.2s ease-in-out;
+    }
 
-  .hero-image {
-    max-width: 40%;
-  }
+    .hero-image {
+        max-width: 40%;
+    }
 
-  /* Style pour la section des pétitions populaires */
-  .petitions {
-    margin-top: 40px;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 80%;
-    padding: 0 20px;
-  }
+    /* Style pour la section des pétitions populaires */
+    .petitions {
+        margin-top: 40px;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 80%;
+        padding: 0 20px;
+    }
 
-  .petitions h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
+    .petitions h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
 
-  .petitions ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
+    .petitions ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
 
-  .petitions li {
-    border-radius: 10px;
-    margin-bottom: 20px;
-    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
-    background-color: #ffffff;
-    display: flex;
-    transition: all 0.2s ease-in-out;
-  }
+    .petitions li {
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+        background-color: #ffffff;
+        display: flex;
+        transition: all 0.2s ease-in-out;
+    }
 
-  .petitions li:hover {
-    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s ease-in-out;
-  }
+    .petitions li:hover {
+        box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease-in-out;
+    }
 
-  .petition-image {
-    border-radius: 10px 0px 0px 10px;
-    flex: 0 0 200px;
-    height: 100%;
-    margin-right: 20px;
-    overflow: hidden;
-  }
+    .petition-image {
+        border-radius: 10px 0px 0px 10px;
+        flex: 0 0 200px;
+        height: 100%;
+        margin-right: 20px;
+        overflow: hidden;
+    }
 
-  .petition-image img {
-    max-width: 100%;
-    height: auto;
-    max-height: 100%;
-  }
+    .petition-image img {
+        max-width: 100%;
+        height: auto;
+        max-height: 100%;
+    }
 
-  .petition-content {
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    max-width: 70%;
-  }
+    .petition-content {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        max-width: 70%;
+    }
 
-  .petition-content h3 {
-    font-size: 20px;
-    margin-bottom: 10px;
-  }
+    .petition-content h3 {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
 
-  .petition-content p {
-    margin: 0;
-  }
+    .petition-content p {
+        margin: 0;
+    }
 
-  .sign {
-    display: flex;
-    align-items: center;
-    margin: auto;
-  }
+    .sign {
+        display: flex;
+        align-items: center;
+        margin: auto;
+    }
 
-  .button-small {
-    padding: 10px 20px;
-    border: none;
-    font-size: 16px;
-    border-radius: 5px;
-    background-color: #fed500;
-    color: #000;
-    transition: all 0.2s ease-in-out;
-  }
+    .button-small {
+        padding: 10px 20px;
+        border: none;
+        font-size: 16px;
+        border-radius: 5px;
+        background-color: #fed500;
+        color: #000;
+        transition: all 0.2s ease-in-out;
+    }
 
-  .button-small:hover {
-    cursor: pointer;
-    background-color: #e4be00;
-    transition: all 0.2s ease-in-out;
-  }
+    .button-small:hover {
+        cursor: pointer;
+        background-color: #e4be00;
+        transition: all 0.2s ease-in-out;
+    }
 
-  .signature-count {
-    display: inline-block;
-    background-color: #fed500;
-    color: #000000;
-    padding: 5px 10px;
-    border-radius: 10px;
-    margin-top: 10px;
-    max-width: max-content;
-  }
-
-
-  /* footer styles */
-  footer {
-    background-color: #333;
-    color: #fff;
-    padding: 30px;
-    text-align: center;
-  }
-
-  footer a {
-    color: #fff;
-    text-decoration: none;
-    margin: 10px;
-  }
-
-  footer a:hover {
-    color: #9b9b9b;
-    opacity: 0.8;
-    transition: opacity 0.2s ease-in-out;
-  }
-</style>
-
-<body>
-  <script>
-    var Header = {
-      view: function () {
-        return m("header", [
-          m(".logo", "PétiQuik"),
-          m("nav", [
-            m("ul", [
-              m("li", m("a", { href: "index.html#!/home" }, "Accueil")),
-              m("li", m("a", { href: "index.html#!/petitions" }, "Pétitions")),
-              m("li", m("a", { href: "#" }, "Actions")),
-              m("li", m("a", { href: "#" }, "Blog")),
-              m("li", m("a", { href: "#" }, "Nous Contacter")),
-            ]),
-          ]),
-          m(".search-bar", [
-            m("form", { action: "#", method: "get" }, [
-              m("input", {
-                type: "text",
-                name: "search",
-                placeholder: "Recherchez des pétitions...",
-              }),
-              m("button", { type: "submit" }, "Rechercher"),
-            ]),
-          ]),
-          m("nav", [
-            m("ul", [
-              m(
-                "a",
-                { href: "index.html#!/connexion" },
-                "Se connecter"
-              ),
-            ]),
-          ]),
-        ]);
-      },
-    };
-
-    var HeroSection = {
-      view: () =>
-        m(".hero-section", [
-          m(".hero-content", [
-            m(
-              "h1",
-              "Rejoignez des millions de personnes pour faire une différence"
-            ),
-            m(
-              "p",
-              "Nous sommes une communauté mondiale de personnes qui se rassemblent pour changer le monde. Nous avons le pouvoir de faire une différence, un vote à la fois. Rejoignez-nous et devenez le changement que vous voulez voir dans le monde."
-            ),
-            m("a", { class: "button-big", href: "index.html#!/petitions"}, "Voir toutes les pétitions"),
-          ]),
-          m(".hero-image", [
-            m("img", {
-              src: "https://picsum.photos/500/300",
-              alt: "Image de personnes manifestant pacifiquement",
-            }),
-          ]),
-        ]),
-    };
-
-    var popularPetitions = [
-      {
-        title: "Stopper la pollution plastique",
-        description:
-          "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
-        signatures: 25000,
-        image: "https://picsum.photos/200/150",
-      },
-      {
-        title: "Pour une éducation inclusive",
-        description:
-          "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
-        signatures: 18000,
-        image: "https://picsum.photos/200/150",
-      },
-      {
-        title: "Sauvons les abeilles",
-        description:
-          "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
-        signatures: 35000,
-        image: "https://picsum.photos/200/150",
-      },
-    ];
-
-    var allPetitions = [
-    {
-        title: "Stopper la pollution plastique",
-        description:
-          "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
-        signatures: 25000,
-        image: "https://picsum.photos/200/150",
-      },
-      {
-        title: "Pour une éducation inclusive",
-        description:
-          "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
-        signatures: 18000,
-        image: "https://picsum.photos/200/150",
-      },
-      {
-        title: "Sauvons les abeilles",
-        description:
-          "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
-        signatures: 35000,
-        image: "https://picsum.photos/200/150",
-      },
-      {
-        title: "Stopper la pollution plastique",
-        description:
-          "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
-        signatures: 25000,
-        image: "https://picsum.photos/200/150",
-      },
-      {
-        title: "Pour une éducation inclusive",
-        description:
-          "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
-        signatures: 18000,
-        image: "https://picsum.photos/200/150",
-      },
-      {
-        title: "Sauvons les abeilles",
-        description:
-          "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
-        signatures: 35000,
-        image: "https://picsum.photos/200/150",
-      },
-      {
-        title: "Stopper la pollution plastique",
-        description:
-          "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
-        signatures: 25000,
-        image: "https://picsum.photos/200/150",
-      },
-      {
-        title: "Pour une éducation inclusive",
-        description:
-          "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
-        signatures: 18000,
-        image: "https://picsum.photos/200/150",
-      },
-      {
-        title: "Sauvons les abeilles",
-        description:
-          "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
-        signatures: 35000,
-        image: "https://picsum.photos/200/150",
-      },
-    ];
-
-    var PopularPetitions = {
-      view: function () {
-        return m(".petitions", [
-          m("h2", "Pétitions populaires"),
-          m(
-            "ul",
-            popularPetitions.map(function (petition) {
-              return m(Petition, petition);
-            })
-          ),
-        ]);
-      },
-    };
-
-    var AllPetitions = {
-      view: function() {
-        return m(".petitions", [
-          m("h2", "Nos pétitions"),
-          m("ul", allPetitions.map(function (petition) {
-            return m(Petition, petition);
-          })),
-        ]);
-      },
-    };
-
-    var Petition = {
-      view: function (vnode) {
-        return m("li", [
-          m(".petition-image", [
-            m("img", { src: vnode.attrs.image, alt: vnode.attrs.title }),
-          ]),
-          m(".petition-content", [
-            m("h3", vnode.attrs.title),
-            m("p", vnode.attrs.description),
-            m("div.signature-count", vnode.attrs.signatures + " signataires"),
-          ]),
-          m(".sign", [
-            m("a", { class: "button-small", href: "index.html#!/petitions"}, "Signer"),
-          ])
-        ]);
-      },
-    };
-
-    var Footer = {
-      view: function () {
-        return m("footer", [
-          m("p", "PetiQuik © 2023 Tous droits réservés."),
-          m("a", { href: "https://facebook.com", target:"_blank" }, "Politique de confidentialité"),
-          m("a", { href: "#", target:"_blank" }, "Conditions d'utilisation")
-        ]);
-      }
+    .signature-count {
+        display: inline-block;
+        background-color: #fed500;
+        color: #000000;
+        padding: 5px 10px;
+        border-radius: 10px;
+        margin-top: 10px;
+        max-width: max-content;
     }
 
 
-    var HomePage = {
-      view: function () {
-        return m("body", [
-          m(Header),
-          m(HeroSection),
-          m(PopularPetitions),
-          m(Footer)
-        ]);
-      },
-    };
+    /* footer styles */
+    footer {
+        background-color: #333;
+        color: #fff;
+        padding: 30px;
+        text-align: center;
+    }
 
-    var PetitionPage = {
-      view: function () {
-        return m("body", [
-          m(Header),
-          m(AllPetitions),
-        ]);
-      },
-    };
-    
-    var ConnexionPage = {
-      view: function () {
-        return m("body", [
-          m(Header),
-        ]);
-      },
-    };
+    footer a {
+        color: #fff;
+        text-decoration: none;
+        margin: 10px;
+    }
 
-    m.route(document.body, "/home", {
-      "/home": HomePage,
-      "/petitions": PetitionPage,
-      "/connexion": ConnexionPage,
-    })
-  </script>
+    footer a:hover {
+        color: #9b9b9b;
+        opacity: 0.8;
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    .profile-pic {
+        border: solid;
+        border-radius: 50px;
+        max-height: 50px;
+    }
+
+    .header-profile {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<body>
+    <script>
+        var Login = {
+            name: "",
+            email: "",
+            ID: "",
+            url: "",
+            handleCredential: function (response) {
+                console.log("callback called:" + response.credential)
+                // decodeJwtResponse() is a custom function defined by you
+                // to decode the credential response.
+                const responsePayload = jwt_decode(response.credential);
+
+                console.log("ID: " + responsePayload.sub);
+                console.log('Full Name: ' + responsePayload.name);
+                console.log('Given Name: ' + responsePayload.given_name);
+                console.log('Family Name: ' + responsePayload.family_name);
+                console.log("Image URL: " + responsePayload.picture);
+                console.log("Email: " + responsePayload.email);
+
+                //DiceGame.name = responsePayload.name
+                Login.name = responsePayload.name
+                Login.email = responsePayload.email
+                Login.ID = response.credential
+                Login.url = responsePayload.picture
+                // external event
+                m.redraw()
+            }
+        }
+
+        var Header = {
+            view: function () {
+                if (Login.name) {
+                    return m("header", [
+                        m(".logo", "PétiQuik"),
+                        m("nav", [
+                            m("ul", [
+                                m("li", m("a", { href: "index_petiquik.html#!/home" }, "Accueil")),
+                                m("li", m("a", { href: "index_petiquik.html#!/petitions" }, "Pétitions")),
+                                m("li", m("a", { href: "#" }, "Actions")),
+                                m("li", m("a", { href: "#" }, "Blog")),
+                                m("li", m("a", { href: "#" }, "Nous Contacter")),
+                            ]),
+                        ]),
+                        m(".search-bar", [
+                            m("form", { action: "#", method: "get" }, [
+                                m("input", {
+                                    type: "text",
+                                    name: "search",
+                                    placeholder: "Recherchez des pétitions...",
+                                }),
+                                m("button", { type: "submit" }, "Rechercher"),
+                            ]),
+                        ]),
+                        m("div", { class: "header-profile" }, [
+                            m("img", { class: "profile-pic", src: Login.url }),
+                            m("p", {style: "margin-left:20px"}, Login.name),
+                        ]),
+                    ]);
+                } else {
+                    return m("header", [
+                        m(".logo", "PétiQuik"),
+                        m("nav", [
+                            m("ul", [
+                                m("li", m("a", { href: "index_petiquik.html#!/home" }, "Accueil")),
+                                m("li", m("a", { href: "index_petiquik.html#!/petitions" }, "Pétitions")),
+                                m("li", m("a", { href: "#" }, "Actions")),
+                                m("li", m("a", { href: "#" }, "Blog")),
+                                m("li", m("a", { href: "#" }, "Nous Contacter")),
+                            ]),
+                        ]),
+                        m(".search-bar", [
+                            m("form", { action: "#", method: "get" }, [
+                                m("input", {
+                                    type: "text",
+                                    name: "search",
+                                    placeholder: "Recherchez des pétitions...",
+                                }),
+                                m("button", { type: "submit" }, "Rechercher"),
+                            ]),
+                        ]),
+                        m("div", {
+                            "id": "g_id_onload",
+                            "data-client_id": "115500541537-rapfqet1t2qmbv79oqc5dcfqdebopj1g.apps.googleusercontent.com",
+                            "data-callback": "handleCredentialResponse"
+                        }),
+                        m("div", {
+                            "class": "g_id_signin",
+                            "data-type": "standard"
+                        }),
+                    ]);
+                }
+            },
+        };
+
+        function handleCredentialResponse(response) {
+            console.log("callback called:" + response.credential)
+            Login.handleCredential(response)
+        }
+
+        var HeroSection = {
+            view: () =>
+                m(".hero-section", [
+                    m(".hero-content", [
+                        m(
+                            "h1",
+                            "Rejoignez des millions de personnes pour faire une différence"
+                        ),
+                        m(
+                            "p",
+                            "Nous sommes une communauté mondiale de personnes qui se rassemblent pour changer le monde. Nous avons le pouvoir de faire une différence, un vote à la fois. Rejoignez-nous et devenez le changement que vous voulez voir dans le monde."
+                        ),
+                        m("a", { class: "button-big", href: "index_petiquik.html#!/petitions" }, "Voir toutes les pétitions"),
+                    ]),
+                    m(".hero-image", [
+                        m("img", {
+                            src: "https://picsum.photos/500/300",
+                            alt: "Image de personnes manifestant pacifiquement",
+                        }),
+                    ]),
+                ]),
+        };
+
+        var popularPetitions = [
+            {
+                title: "Stopper la pollution plastique",
+                description:
+                    "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
+                signatures: 25000,
+                image: "https://picsum.photos/200/150",
+            },
+            {
+                title: "Pour une éducation inclusive",
+                description:
+                    "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
+                signatures: 18000,
+                image: "https://picsum.photos/200/150",
+            },
+            {
+                title: "Sauvons les abeilles",
+                description:
+                    "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
+                signatures: 35000,
+                image: "https://picsum.photos/200/150",
+            },
+        ];
+
+        var allPetitions = [
+            {
+                title: "Stopper la pollution plastique",
+                description:
+                    "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
+                signatures: 25000,
+                image: "https://picsum.photos/200/150",
+            },
+            {
+                title: "Pour une éducation inclusive",
+                description:
+                    "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
+                signatures: 18000,
+                image: "https://picsum.photos/200/150",
+            },
+            {
+                title: "Sauvons les abeilles",
+                description:
+                    "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
+                signatures: 35000,
+                image: "https://picsum.photos/200/150",
+            },
+            {
+                title: "Stopper la pollution plastique",
+                description:
+                    "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
+                signatures: 25000,
+                image: "https://picsum.photos/200/150",
+            },
+            {
+                title: "Pour une éducation inclusive",
+                description:
+                    "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
+                signatures: 18000,
+                image: "https://picsum.photos/200/150",
+            },
+            {
+                title: "Sauvons les abeilles",
+                description:
+                    "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
+                signatures: 35000,
+                image: "https://picsum.photos/200/150",
+            },
+            {
+                title: "Stopper la pollution plastique",
+                description:
+                    "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
+                signatures: 25000,
+                image: "https://picsum.photos/200/150",
+            },
+            {
+                title: "Pour une éducation inclusive",
+                description:
+                    "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
+                signatures: 18000,
+                image: "https://picsum.photos/200/150",
+            },
+            {
+                title: "Sauvons les abeilles",
+                description:
+                    "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
+                signatures: 35000,
+                image: "https://picsum.photos/200/150",
+            },
+        ];
+
+        var PopularPetitions = {
+            view: function () {
+                return m(".petitions", [
+                    m("h2", "Pétitions populaires"),
+                    m(
+                        "ul",
+                        popularPetitions.map(function (petition) {
+                            return m(Petition, petition);
+                        })
+                    ),
+                ]);
+            },
+        };
+
+        var AllPetitions = {
+            view: function () {
+                return m(".petitions", [
+                    m("h2", "Nos pétitions"),
+                    m("ul", allPetitions.map(function (petition) {
+                        return m(Petition, petition);
+                    })),
+                ]);
+            },
+        };
+
+        var Petition = {
+            view: function (vnode) {
+                return m("li", [
+                    m(".petition-image", [
+                        m("img", { src: vnode.attrs.image, alt: vnode.attrs.title }),
+                    ]),
+                    m(".petition-content", [
+                        m("h3", vnode.attrs.title),
+                        m("p", vnode.attrs.description),
+                        m("div.signature-count", vnode.attrs.signatures + " signataires"),
+                    ]),
+                    m(".sign", [
+                        m("a", { class: "button-small", href: "index_petiquik.html#!/petitions" }, "Signer"),
+                    ])
+                ]);
+            },
+        };
+
+        var Footer = {
+            view: function () {
+                return m("footer", [
+                    m("p", "PetiQuik © 2023 Tous droits réservés."),
+                    m("a", { href: "https://facebook.com", target: "_blank" }, "Politique de confidentialité"),
+                    m("a", { href: "#", target: "_blank" }, "Conditions d'utilisation")
+                ]);
+            }
+        }
+
+
+        var HomePage = {
+            view: function () {
+                return m("body", [
+                    m(Header),
+                    m(HeroSection),
+                    m(PopularPetitions),
+                    m(Footer)
+                ]);
+            },
+        };
+
+        var PetitionPage = {
+            view: function () {
+                return m("body", [
+                    m(Header),
+                    m(AllPetitions),
+                    m(Footer),
+                ]);
+            },
+        };
+
+        var ProfilePage = {
+            view: function () {
+                return m("body", [
+                    m(Header),
+                    m(Footer)
+                ]);
+            },
+        };
+
+        m.route(document.body, "/home", {
+            "/home": HomePage,
+            "/petitions": PetitionPage,
+            "/profile": ProfilePage,
+        })
+    </script>
+
+    <div id="toto"></div>
 </body>
 
 </html>
