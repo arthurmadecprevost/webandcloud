@@ -280,6 +280,69 @@
     .header-profile:hover {
         color: #9b9b9b
     }
+
+    .profile-card {
+        border-radius: 10px;
+        max-width: 500px;
+        margin: 40px auto;
+        margin-bottom: 20px;
+        box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+        background-color: #ffffff;
+        display: flex;
+        transition: all 0.2s ease-in-out;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .profile-image {
+        border-radius: 50%;
+        overflow: hidden;
+        max-height: 150px;
+        max-width: 150px;
+        margin:20px
+    }
+
+    .profile-info {
+        margin-left:20px
+    }
+
+    .profile-name {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+
+    .profile-date {
+        margin-bottom: 20px;
+    }
+
+    .profile-petitions-header {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .profile-petitions-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .profile-petitions-list li {
+        margin-bottom: 5px;
+    }
+
+    .profile-petitions-list a {
+        display: block;
+        padding: 5px 0;
+        color: #333;
+        text-decoration: none;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .profile-petitions-list a:hover {
+        color: #000;
+        opacity: 0.8;
+    }
 </style>
 
 <body>
@@ -459,6 +522,90 @@
             },
         };
 
+        var user = {
+            firstName: "John",
+            lastName: "Doe",
+            profilePic: "https://picsum.photos/200",
+            joinDate: "2022-01-01",
+            petitionsSigned: [
+                {
+                    title: "Stopper la pollution plastique",
+                    description: "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
+                    signatures: 25000,
+                    image: "https://example.com/images/petition1.jpg"
+                },
+                {
+                    title: "Pour une éducation inclusive",
+                    description: "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
+                    signatures: 18000,
+                    image: "https://example.com/images/petition2.jpg"
+                },
+                {
+                    title: "Sauvons les abeilles",
+                    description: "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
+                    signatures: 35000,
+                    image: "https://example.com/images/petition3.jpg"
+                }
+            ]
+        };
+
+        var petitions = [
+            {
+                title: "Stopper la pollution plastique",
+                description: "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
+                signatures: 25000,
+                image: "https://example.com/images/petition1.jpg"
+            },
+            {
+                title: "Pour une éducation inclusive",
+                description: "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
+                signatures: 18000,
+                image: "https://example.com/images/petition2.jpg"
+            },
+            {
+                title: "Sauvons les abeilles",
+                description: "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
+                signatures: 35000,
+                image: "https://example.com/images/petition3.jpg"
+            },
+            {
+                title: "Pour un internet libre",
+                description: "Nous demandons aux gouvernements et aux entreprises de protéger la neutralité du net pour garantir un accès libre et égalitaire à l'information pour tous.",
+                signatures: 12000,
+                image: "https://example.com/images/petition4.jpg"
+            }
+        ];
+
+
+        const ProfileView = {
+            view: function (vnode) {
+                const user = vnode.attrs.user;
+                const petitions = vnode.attrs.petitions;
+
+                return m('.div', [
+                    m('.profile-card', [
+                        m('.profile-image', [
+                            m('img', { src: user.profilePic })
+                        ]),
+                        m('.profile-info', [
+                            m('h2.profile-name', user.firstName + ' ' + user.lastName),
+                            m('p.profile-date', 'Membre depuis ' + user.joinDate),
+                        ]),
+                    ]),
+                    m('div', [
+                         m('h3.profile-petitions-header', 'Pétitions signées'),
+                        m('ul.profile-petitions-list', petitions.map(function (petition) {
+                            return m('li', [
+                                m('a', { href: petition.url }, petition.title)
+                            ])
+                        }))
+                    ])
+                ]);
+
+            }
+        };
+
+
         var Petition = {
             view: function (vnode) {
                 return m("li", [
@@ -512,6 +659,7 @@
             view: function () {
                 return m("body", [
                     m(Header),
+                    m(ProfileView, { user: user, petitions: petitions }),
                     m(Footer)
                 ]);
             },
