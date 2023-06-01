@@ -41,10 +41,8 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Transaction;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 
-import foo.model.Petition;
-import foo.util.*;
+import foo.Petition;
 
 @Api(name = "petiQuik",
      version = "v1",
@@ -120,7 +118,7 @@ public class PetitionEndpoint {
 	@ApiMethod(name = "mesPetitions", httpMethod = HttpMethod.GET)
 	public List<Entity> mesPetitions(Petition petition) {
 		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("creator",
-                Query.FilterOperator.EQUAL, petition.currentUser.toString()));
+                Query.FilterOperator.EQUAL, petition.createur.getId().toString()));
 		
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -132,7 +130,7 @@ public class PetitionEndpoint {
 	@ApiMethod(name = "mesSignatures", httpMethod = HttpMethod.GET)
 	public List<Entity> mesSignatures(Petition petition) {
 		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("votants",
-                Query.FilterOperator.EQUAL, petition.currentUser.toString()));
+                Query.FilterOperator.EQUAL, petition.createur.getId().toString()));
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
@@ -142,8 +140,8 @@ public class PetitionEndpoint {
 	
 	@ApiMethod(name = "search", httpMethod = HttpMethod.GET)
 	public List<Entity> search(Petition petition) {
-		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("titre",
-                Query.FilterOperator.EQUAL, petition.titre.toString()));
+		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("nom",
+                Query.FilterOperator.EQUAL, petition.nom.toString()));
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
@@ -157,9 +155,9 @@ public class PetitionEndpoint {
 		if (utilisateur == null) {
 			throw new UnauthorizedException("Invalid credentials");
 		}
-		Entity e = new Entity("Petition", Long.MAX_VALUE-(new Date()).getTime() +":" + petition.currentUser);
+		Entity e = new Entity("Petition", Long.MAX_VALUE-(new Date()).getTime() +":" + petition.createur.getId());
 		e.setProperty("description", petition.description);
-		e.setProperty("creator", petition.currentUser);
+		e.setProperty("creator", petition.createur.getId());
 		e.setProperty("nbvotants", 0);
 		e.setProperty("votants", new ArrayList<>());
 		
@@ -167,14 +165,7 @@ public class PetitionEndpoint {
 	    Date date = new Date();  
 	    e.setProperty("datetri", date.getTime());
 		e.setProperty("date", formatter.format(date));
-		String separateur = ";";
-		String[] tagsSep = petition.tags.split(separateur);
-			
-		ArrayList<String> tags = new ArrayList<String>();
-		for (int i = 0; i <tagsSep.length; i++) {
-			tags.add(tagsSep[i]);
-		}
-		e.setProperty("tags", tags);
+		e.setProperty("tags", petition.tags);
 		
 		/**		
 		//crée des signataire
@@ -209,8 +200,8 @@ public class PetitionEndpoint {
 		  if(votants == null) {
 			  votants = new ArrayList<>();
 		  }
-		  if(!votants.contains(petition.currentUser)) {
-			  votants.add(petition.currentUser);
+		  if(!votants.contains(petition.createur.getId())) {
+			  votants.add(petition.createur.getId());
 			  pet.setProperty("votants", votants); 
 			  pet.setProperty("nbvotants", nbVotants + 1 ); 
 		  }
