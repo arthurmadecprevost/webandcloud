@@ -42,20 +42,21 @@ public class PetitionServlet extends HttpServlet {
 		// Create petition
 		for (int i = 0; i < 500; i++) {
 			Entity e = new Entity("Petition", "P" + i );
-			int owner=r.nextInt(1000);
-			e.setProperty("owner", "U"+ owner);
-			e.setProperty("date", new Date());
-			e.setProperty("name", "Pour le retour de Groquik");
-            e.setProperty("description", "skjdhfkqjhglkjsqdfjldg lqksj");
-            e.setProperty("image", "https://picsum.photos/200/150");
-			
-			// Create random votants
-			HashSet<String> fset = new HashSet<String>();
-			for (int j=0;j<200;j++) {
-				fset.add("U" + r.nextInt(1000));
-			}
-			e.setProperty("votants", fset);
-			e.setProperty("nbvotants", fset.size());
+            int owner=r.nextInt(1000);
+            e.setProperty("createurId", "U"+ owner);
+            e.setProperty("dateCreation", new Date());
+            e.setProperty("nom", "Pour le retour de Groquik");
+            e.setProperty("description", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque pretium id elit eget dictum. Curabitur libero justo, posuere id rhoncus vel, elementum porttitor diam. Cras venenatis mauris eu augue rutrum, vitae accumsan nunc sodales. Sed luctus ligula nibh, hendrerit bibendum nisi maximus ac. Etiam faucibus rhoncus risus, id pellentesque neque. Etiam vel sollicitudin tellus, semper mollis lorem. Nam sit amet semper metus, non suscipit enim. Nullam sed hendrerit felis. Sed justo purus, pulvinar in enim at, aliquam finibus sem.");
+            e.setProperty("image", "https://picsum.photos/400/300");
+            e.setProperty("objectif", 10);
+
+            // Create random votants
+            HashSet<String> fset = new HashSet<String>();
+            for (int j=0;j<200;j++) {
+                fset.add("U" + r.nextInt(1000));
+            }
+            e.setProperty("votants", fset);
+            e.setProperty("nbVotants", fset.size());
 			
 			// Create random tags
 			HashSet<String> ftags = new HashSet<String>();
