@@ -36,7 +36,7 @@ var Header = {
                     m("ul", [
                         m("li", m("a", { href: "index_petiquik.html#!/home" }, "Accueil")),
                         m("li", m("a", { href: "index_petiquik.html#!/petitions" }, "Pétitions")),
-                        m("li", m("a", { href: "#" }, "Actions")),
+                        m("li", m("a", { href: "index_petiquik.html#!/create" }, "Nouvelle pétition")),
                         m("li", m("a", { href: "#" }, "Blog")),
                         m("li", m("a", { href: "#" }, "Nous Contacter")),
                     ]),
@@ -153,7 +153,7 @@ var myPetitions = {
     loadList: function () {
         return m.request({
             method: "GET",
-            url: "_ah/api/petiQuik/v1/mesPetitions/"+Login.ID
+            url: "_ah/api/petiQuik/v1/mesPetitions"+'?access_token='+Login.ID
         }).then(function (result) {
             myPetitions.list = result.items;
             console.log("myPetitions.list:", result.items);
@@ -244,9 +244,10 @@ var petitions = [
 
 
 const ProfileView = {
+    oninit: myPetitions.loadList,
     view: function (vnode) {
         const user = vnode.attrs.user;
-        const petitions = vnode.attrs.petitions;
+        const petitions = myPetitions.list;
 
         return m('.div', [
             m('.profile-card', [
