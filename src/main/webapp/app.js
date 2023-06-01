@@ -148,6 +148,20 @@ var popularPetitions = {
     },
 }
 
+var myPetitions = {
+    list: [],
+    loadList: function () {
+        return m.request({
+            method: "GET",
+            url: "_ah/api/petiQuik/v1/mesPetitions/"+Login.ID
+        }).then(function (result) {
+            myPetitions.list = result.items;
+            console.log("myPetitions.list:", result.items);
+            // m.redraw();
+        })
+    },
+}
+
 var PopularPetitionsView = {
     oninit: popularPetitions.loadList,
     view: function () {
@@ -393,11 +407,10 @@ var Petition = {
             m(".petition-content", [
                 m("h3", vnode.attrs.properties.name),
                 m("p", vnode.attrs.properties.description),
-                m("a", {href: "index_petiquik.html#!/petition/"+vnode.attrs.key.name }, "LIEN"+vnode.attrs.key.name),
                 m("div.signature-count", vnode.attrs.properties.nbvotants + " signataires"),
             ]),
             m(".sign", [
-                m("a", { class: "button-small", href: "index_petiquik.html#!/petitions" }, "Signer"),
+                m("a", { class: "button-small", href: "index_petiquik.html#!/petition/"+vnode.attrs.key.name }, "Signer"),
             ])
         ]);
     },
@@ -436,11 +449,15 @@ var AllPetitionsPage = {
 
 var ProfilePage = {
     view: function () {
-        return m("body", [
-            m(Header),
-            m(ProfileView, { user: Login, petitions: popularPetitions.list }),
-            m(Footer)
-        ]);
+        if (Login.ID) {
+            return m("body", [
+                m(Header),
+                m(ProfileView, { user: Login, petitions: popularPetitions.list }),
+                m(Footer)
+            ]);
+        } else {
+            m.route.set("/home");
+        }
     },
 };
 
@@ -458,11 +475,15 @@ var PetitionPage = {
 
 var CreatePage = {
     view: function () {
-        return m("body", [
-            m(Header),
-            m(CreateView),
-            m(Footer)
-        ]);
+        if (Login.ID) {
+            return m("body", [
+                m(Header),
+                m(CreateView),
+                m(Footer)
+            ]);
+        } else {
+            m.route.set("/home");
+        }
     }
 };
 
