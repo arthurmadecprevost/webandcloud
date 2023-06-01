@@ -1,0 +1,330 @@
+/* reset styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* global styles */
+body {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* header styles */
+header {
+    display: flex;
+    flex-grow: 1;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-content: space-evenly;
+    align-items: center;
+    padding: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+    background-color: #fed500;
+    padding: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 9px;
+    max-width: 100%;
+    height: auto;
+    transition: all 0.2s ease-in-out;
+}
+
+.logo:hover {
+    background-color: #e2bd00;
+    transition: all 0.2s ease-in-out;
+}
+
+nav ul {
+    display: flex;
+    list-style-type: none;
+}
+
+nav li {
+    margin-right: 20px;
+}
+
+nav a {
+    padding: 10px;
+    border-radius: 5px;
+    transition: all 0.2s ease-in-out;
+}
+
+nav a:hover {
+    background-color: #e4be00;
+    transition: all 0.2s ease-in-out;
+}
+
+.search-bar input[type="text"] {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.search-bar button[type="submit"] {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #fed500;
+    color: #000000;
+}
+
+.search-bar button[type="submit"]:hover {
+    cursor: pointer;
+    background-color: #e4be00;
+    transition: all 0.2s ease-in-out;
+}
+
+/* hero section styles */
+.hero-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 50px;
+    background-color: #f5f5f5;
+}
+
+.hero-content {
+    max-width: 50%;
+}
+
+.hero-content h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    margin-bottom: 20px;
+}
+
+.button-big {
+    padding: 10px 20px;
+    border: none;
+    font-size: 20px;
+    border-radius: 5px;
+    background-color: #fed500;
+    color: #000;
+    transition: all 0.2s ease-in-out;
+}
+
+.button-big:hover {
+    cursor: pointer;
+    background-color: #e4be00;
+    transition: all 0.2s ease-in-out;
+}
+
+.hero-image {
+    max-width: 40%;
+}
+
+/* Style pour la section des pétitions populaires */
+.petitions {
+    margin-top: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 80%;
+    padding: 0 20px;
+}
+
+.petitions h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.petitions ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.petitions li {
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    display: flex;
+    transition: all 0.2s ease-in-out;
+}
+
+.petitions li:hover {
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease-in-out;
+}
+
+.petition-image {
+    border-radius: 10px 0px 0px 10px;
+    flex: 0 0 200px;
+    height: 100%;
+    margin-right: 20px;
+    overflow: hidden;
+}
+
+.petition-image img {
+    max-width: 100%;
+    height: auto;
+    max-height: 100%;
+}
+
+.petition-content {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 70%;
+}
+
+.petition-content h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.petition-content p {
+    margin: 0;
+}
+
+.sign {
+    display: flex;
+    align-items: center;
+    margin: auto;
+}
+
+.button-small {
+    padding: 10px 20px;
+    border: none;
+    font-size: 16px;
+    border-radius: 5px;
+    background-color: #fed500;
+    color: #000;
+    transition: all 0.2s ease-in-out;
+}
+
+.button-small:hover {
+    cursor: pointer;
+    background-color: #e4be00;
+    transition: all 0.2s ease-in-out;
+}
+
+.signature-count {
+    display: inline-block;
+    background-color: #fed500;
+    color: #000000;
+    padding: 5px 10px;
+    border-radius: 10px;
+    margin-top: 10px;
+    max-width: max-content;
+}
+
+
+/* footer styles */
+footer {
+    background-color: #333;
+    color: #fff;
+    padding: 30px;
+    text-align: center;
+}
+
+footer a {
+    color: #fff;
+    text-decoration: none;
+    margin: 10px;
+}
+
+footer a:hover {
+    color: #9b9b9b;
+    opacity: 0.8;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.profile-pic {
+    border: solid;
+    border-radius: 50px;
+    max-height: 50px;
+}
+
+.header-profile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-profile:hover {
+    color: #9b9b9b
+}
+
+.profile-card {
+    border-radius: 10px;
+    max-width: 500px;
+    margin: 40px auto;
+    margin-bottom: 20px;
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    display: flex;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.profile-image {
+    border-radius: 50%;
+    overflow: hidden;
+    max-height: 150px;
+    max-width: 150px;
+    margin:20px
+}
+
+.profile-info {
+    margin-left:20px
+}
+
+.profile-name {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.profile-date {
+    margin-bottom: 20px;
+}
+
+.profile-petitions-header {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.profile-petitions-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.profile-petitions-list li {
+    margin-bottom: 5px;
+}
+
+.profile-petitions-list a {
+    display: block;
+    padding: 5px 0;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.profile-petitions-list a:hover {
+    color: #000;
+    opacity: 0.8;
+}
