@@ -188,61 +188,6 @@ var AllPetitionsView = {
     },
 };
 
-var user = {
-    firstName: "John",
-    lastName: "Doe",
-    profilePic: "https://picsum.photos/200",
-    joinDate: "2022-01-01",
-    petitionsSigned: [
-        {
-            title: "Stopper la pollution plastique",
-            description: "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
-            signatures: 25000,
-            image: "https://example.com/images/petition1.jpg"
-        },
-        {
-            title: "Pour une éducation inclusive",
-            description: "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
-            signatures: 18000,
-            image: "https://example.com/images/petition2.jpg"
-        },
-        {
-            title: "Sauvons les abeilles",
-            description: "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
-            signatures: 35000,
-            image: "https://example.com/images/petition3.jpg"
-        }
-    ]
-};
-
-var petitions = [
-    {
-        title: "Stopper la pollution plastique",
-        description: "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
-        signatures: 25000,
-        image: "https://example.com/images/petition1.jpg"
-    },
-    {
-        title: "Pour une éducation inclusive",
-        description: "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
-        signatures: 18000,
-        image: "https://example.com/images/petition2.jpg"
-    },
-    {
-        title: "Sauvons les abeilles",
-        description: "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
-        signatures: 35000,
-        image: "https://example.com/images/petition3.jpg"
-    },
-    {
-        title: "Pour un internet libre",
-        description: "Nous demandons aux gouvernements et aux entreprises de protéger la neutralité du net pour garantir un accès libre et égalitaire à l'information pour tous.",
-        signatures: 12000,
-        image: "https://example.com/images/petition4.jpg"
-    }
-];
-
-
 const ProfileView = {
     oninit: myPetitions.loadList,
     view: function (vnode) {
@@ -279,10 +224,23 @@ var CreateView = {
     tags: [],
   
     submitForm: function () {
-      // Ici, vous pouvez implémenter la logique pour soumettre le formulaire
-      // par exemple, envoyer les données de la pétition au serveur
-  
-      console.log("Données du formulaire :", this.name, this.description, this.picture, this.objective, this.tags);
+        var pet = {
+            nom: CreateView.name,
+            description: CreateView.description,
+            image: CreateView.picture,
+            tags: CreateView.tags,
+            objectif: CreateView.objective,
+        };
+        console.log("Données du formulaire :", pet);
+        return m.request({
+            method: "POST",
+            url: "_ah/api/petiQuik/v1/addPetition"+'?access_token='+Login.ID,
+            params: pet,
+        })
+        .then(function(result) {
+            console.log("created:",result)
+            myPetitions.loadList()
+        })
     },
   
     view: function () {
@@ -343,49 +301,21 @@ const PetitionView = {
             method: "GET",
             url: "_ah/api/petiQuik/v1/getPetition/"+vnode.attrs.id,
         }).then(function (result) {
+            var pet = result.items;
             console.log("got:", pet);
             // m.redraw();
         })
     },
-    view: function (vnode) {
-        pet = {
-            "key": {
-              "kind": "Petition",
-              "appId": "e~tp-dev-cloud",
-              "id": "0",
-              "name": vnode.attrs.id,
-              "namespace": "",
-              "complete": true
-            },
-            "appId": "e~tp-dev-cloud",
-            "namespace": "",
-            "kind": "Petition",
-            "properties": {
-              "owner": "U373",
-              "date": "2023-05-29T21:35:31.953Z",
-              "image": "https://picsum.photos/400/300",
-              "nbvotants": "190",
-              "name": "Pour le retour de Groquik",
-              "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin fermentum venenatis molestie. Nullam elementum augue purus, eu blandit leo varius non. Nunc rhoncus purus nibh, sit amet mattis nisl ornare fermentum.", 
-              "votants": [
-                "U958",
-                "U319"
-              ],
-              "tags": [
-                "T85",
-                "T40"
-              ]
-            }
-          };
+    view: function () {
           return m(".petition-page", [
-                m("h1", {class: "title"}, pet.properties.name),
+                m("h1", {class: "title"}, pet.properties.nom),
                 m("div", {class: "content"}, [
                     m("div", {class:"left"}, [
-                        m("img", { src: pet.properties.image, alt: pet.properties.name, width: "100%"}),
+                        m("img", { src: pet.properties.image, alt: pet.properties.nom, width: "100%"}),
                         m("p", pet.properties.description),
                     ]),
                     m("div", {class: "right"}, [
-                        m("div", {style:"padding-bottom:20px;"},"Il y a actuellement "+pet.properties.nbvotants + " signataires, objectif "+ (pet.properties.nbvotants*1.2)+" !"),
+                        m("div", {style:"padding-bottom:20px;"},"Il y a actuellement "+pet.properties.nbVotants + " signataires, objectif "+ pet.properties.objectif+" !"),
                         m(".sign", [
                             m("a", { class: "button-small", href: "index_petiquik.html#!/petitions", style:"width:100%; text-align:center; font-weight:bold;" }, "Signer la pétition"),
                         ]),
@@ -401,14 +331,19 @@ const PetitionView = {
 
 var Petition = {
     view: function (vnode) {
+        if (vnode.attrs.properties.description.length > 200) {
+            desc = vnode.attrs.properties.description.substr(0, 200)+"...";
+        } else {
+            desc = vnode.attrs.properties.description
+        }
         return m("li", [
             m(".petition-image", [
-                m("img", { src: vnode.attrs.properties.image, alt: vnode.attrs.properties.name }),
+                m("img", { src: vnode.attrs.properties.image, alt: vnode.attrs.properties.nom }),
             ]),
             m(".petition-content", [
-                m("h3", vnode.attrs.properties.name),
-                m("p", vnode.attrs.properties.description),
-                m("div.signature-count", vnode.attrs.properties.nbvotants + " signataires"),
+                m("h3", vnode.attrs.properties.nom),
+                m("p", desc),
+                m("div.signature-count", vnode.attrs.properties.nbVotants + " signataires"),
             ]),
             m(".sign", [
                 m("a", { class: "button-small", href: "index_petiquik.html#!/petition/"+vnode.attrs.key.name }, "Signer"),

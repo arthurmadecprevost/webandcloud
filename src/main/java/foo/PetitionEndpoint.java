@@ -112,13 +112,13 @@ public class PetitionEndpoint {
 	
 	/**
 	 * 
-	 * @param currentUser
-	 * @return
+	 * @param user User
+	 * @return Une liste de pétitions
 	 */
 	@ApiMethod(name = "mesPetitions", httpMethod = HttpMethod.GET)
-	public List<Entity> mesPetitions(Petition petition) {
-		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("creator",
-                Query.FilterOperator.EQUAL, petition.createur.getId().toString()));
+	public List<Entity> mesPetitions(User user) {
+		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("owner",
+                Query.FilterOperator.EQUAL, user.getId()));
 		
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -150,34 +150,27 @@ public class PetitionEndpoint {
 	}
 	
 	
-	@ApiMethod(name = "addPetition", httpMethod = HttpMethod.POST)
-	public Entity addPetition(User utilisateur, Petition petition) throws Exception{ 
-		if (utilisateur == null) {
+    @ApiMethod(name = "addPetition", httpMethod = HttpMethod.POST)
+	public Entity addPetition(User user, Petition petition) throws Exception{ 
+		if (user == null) {
 			throw new UnauthorizedException("Invalid credentials");
 		}
-		Entity e = new Entity("Petition", Long.MAX_VALUE-(new Date()).getTime() +":" + petition.createur.getId());
+		Entity e = new Entity("Petition", Long.MAX_VALUE-(new Date()).getTime() +":" + user.getId());
 		e.setProperty("description", petition.description);
-		e.setProperty("creator", petition.createur.getId());
-		e.setProperty("nbvotants", 0);
+        e.setProperty("nom", petition.nom);
+        e.setProperty("image", petition.image);
+		e.setProperty("createurId", user.getId());
+		e.setProperty("nbVotants", 0);
+		e.setProperty("objectif", petition.objectif);
 		e.setProperty("votants", new ArrayList<>());
+
 		
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");  
 	    Date date = new Date();  
 	    e.setProperty("datetri", date.getTime());
-		e.setProperty("date", formatter.format(date));
+		e.setProperty("dateCreation", formatter.format(date));
 		e.setProperty("tags", petition.tags);
 		
-		/**		
-		//crée des signataire
-		ArrayList<String> fset = new ArrayList<String>();
-		fset.add(user.getEmail());
-		e.setProperty("signatory",fset);
-		e.setProperty("nbSignatory",305);//fset.size());
-				
-		//crée des tags
-		HashSet<String> fset2 = new HashSet<String>();
-		e.setProperty("tag", fset2);
-		*/		
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		datastore.put(e);
 		return e;
