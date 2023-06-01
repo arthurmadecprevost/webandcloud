@@ -59,7 +59,7 @@ public class PetitionEndpoint {
 
 	@ApiMethod(name = "top100", httpMethod = HttpMethod.GET)
 	public List<Entity> top100() {
-		Query q = new Query("Petition").addSort("nbvotants", SortDirection.DESCENDING);
+		Query q = new Query("Petition").addSort("nbVotants", SortDirection.DESCENDING);
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
 		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
@@ -92,7 +92,7 @@ public class PetitionEndpoint {
 	
 	@ApiMethod(name = "top4", httpMethod = HttpMethod.GET)
 	public List<Entity> top4() {
-		Query q = new Query("Petition").addSort("nbvotants", SortDirection.DESCENDING);
+		Query q = new Query("Petition").addSort("nbVotants", SortDirection.DESCENDING);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
