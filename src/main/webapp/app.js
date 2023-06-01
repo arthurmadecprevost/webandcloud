@@ -63,7 +63,7 @@ var Header = {
                     m("ul", [
                         m("li", m("a", { href: "index_petiquik.html#!/home" }, "Accueil")),
                         m("li", m("a", { href: "index_petiquik.html#!/petitions" }, "Pétitions")),
-                        m("li", m("a", { href: "#" }, "Actions")),
+                        m("li", m("a", { href: "index_petiquik.html#!/create" }, "Nouvelle pétition")),
                         m("li", m("a", { href: "#" }, "Blog")),
                         m("li", m("a", { href: "#" }, "Nous Contacter")),
                     ]),
@@ -253,9 +253,74 @@ const ProfileView = {
                 }))
             ])
         ]);
-
     }
 };
+
+var CreateView = {
+    name: "",
+    description: "",
+    objective: 1,
+    picture: "",
+    tags: [],
+  
+    submitForm: function () {
+      // Ici, vous pouvez implémenter la logique pour soumettre le formulaire
+      // par exemple, envoyer les données de la pétition au serveur
+  
+      console.log("Données du formulaire :", this.name, this.description, this.picture, this.objective, this.tags);
+    },
+  
+    view: function () {
+      return m("form", {
+        onsubmit: function (e) {
+          e.preventDefault();
+          CreateView.submitForm();
+        },
+        class:"create-form"}, [
+
+            m("h1", "Créer une pétition"),
+            m("label", "Nom de la pétition"),
+            m("input[type=text]", {
+            value: CreateView.name,
+            oninput: function (e) { CreateView.name = e.target.value; },
+            required: true
+            }),
+    
+            m("label", "Description"),
+            m("textarea", {
+            value: CreateView.description,
+            oninput: function (e) { CreateView.description = e.target.value; },
+            required: true,
+            }),
+
+            m("label", "Photo (400x300)"),
+            m("input[type=url]", {
+            value: CreateView.picture,
+            oninput: function (e) { CreateView.picture = e.target.value; },
+            placeholder:"https://example.com",
+            pattern:"https://.*",
+            required: true,
+            }),
+    
+            m("label", "Objectif de votants"),
+            m("input[type=number]", {
+            value: CreateView.objective,
+            oninput: function (e) { CreateView.objective = e.target.value; },
+            required: true,
+            min: "1"
+            }),
+    
+            m("label", "Tags (séparés par des virgules)"),
+            m("input[type=text]", {
+            value: CreateView.tags.join(","),
+            oninput: function (e) { CreateView.tags = e.target.value.split(","); },
+            required: true,
+            }),
+            
+            m("button[type=submit]",{class: "create-button", style: "margin:20px;"} ,"Créer la pétition")
+      ]);
+    }
+  };
 
 const PetitionView = {
     oninit: function (vnode) {
@@ -283,10 +348,10 @@ const PetitionView = {
             "properties": {
               "owner": "U373",
               "date": "2023-05-29T21:35:31.953Z",
-              "image": "https://picsum.photos/200/150",
+              "image": "https://picsum.photos/400/300",
               "nbvotants": "190",
               "name": "Pour le retour de Groquik",
-              "description": "skjdhfkqjhglkjsqdfjldg lqksj",
+              "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin fermentum venenatis molestie. Nullam elementum augue purus, eu blandit leo varius non. Nunc rhoncus purus nibh, sit amet mattis nisl ornare fermentum.", 
               "votants": [
                 "U958",
                 "U319"
@@ -297,12 +362,27 @@ const PetitionView = {
               ]
             }
           };
-        return m("div", [
-            m(Petition, pet),
+          return m(".petition-page", [
+                m("h1", {class: "title"}, pet.properties.name),
+                m("div", {class: "content"}, [
+                    m("div", {class:"left"}, [
+                        m("img", { src: pet.properties.image, alt: pet.properties.name, width: "100%"}),
+                        m("p", pet.properties.description),
+                    ]),
+                    m("div", {class: "right"}, [
+                        m("div", {style:"padding-bottom:20px;"},"Il y a actuellement "+pet.properties.nbvotants + " signataires, objectif "+ (pet.properties.nbvotants*1.2)+" !"),
+                        m(".sign", [
+                            m("a", { class: "button-small", href: "index_petiquik.html#!/petitions", style:"width:100%; text-align:center; font-weight:bold;" }, "Signer la pétition"),
+                        ]),
+                        m(".tags", {style: "margin-top:10px"}, [
+                            m("h3", "Tags"),
+                            m("li",pet.properties.tags.join(", "))
+                        ]),
+                    ])
+                ]),
         ]);
     }
 };
-
 
 var Petition = {
     view: function (vnode) {
@@ -354,6 +434,16 @@ var AllPetitionsPage = {
     },
 };
 
+var ProfilePage = {
+    view: function () {
+        return m("body", [
+            m(Header),
+            m(ProfileView, { user: Login, petitions: popularPetitions.list }),
+            m(Footer)
+        ]);
+    },
+};
+
 var PetitionPage = {
     view: function (vnode) {
         var id = vnode.attrs.id; // Récupère l'ID de la pétition depuis les attributs du vnode
@@ -366,19 +456,20 @@ var PetitionPage = {
     }
 };
 
-var ProfilePage = {
+var CreatePage = {
     view: function () {
         return m("body", [
             m(Header),
-            m(ProfileView, { user: Login, petitions: popularPetitions.list }),
+            m(CreateView),
             m(Footer)
         ]);
-    },
+    }
 };
 
 m.route(document.body, "/home", {
     "/home": HomePage,
     "/petitions": AllPetitionsPage,
     "/profile": ProfilePage,
-    "/petition/:id": PetitionPage
+    "/petition/:id": PetitionPage,
+    "/create": CreatePage,
 })

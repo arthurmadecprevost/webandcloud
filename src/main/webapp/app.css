@@ -229,7 +229,6 @@ nav a:hover {
     max-width: max-content;
 }
 
-
 /* footer styles */
 footer {
     background-color: #333;
@@ -263,7 +262,7 @@ footer a:hover {
 }
 
 .header-profile:hover {
-    color: #9b9b9b
+    color: #9b9b9b;
 }
 
 .profile-card {
@@ -285,11 +284,11 @@ footer a:hover {
     overflow: hidden;
     max-height: 150px;
     max-width: 150px;
-    margin:20px
+    margin: 20px;
 }
 
 .profile-info {
-    margin-left:20px
+    margin-left: 20px;
 }
 
 .profile-name {
@@ -327,4 +326,82 @@ footer a:hover {
 .profile-petitions-list a:hover {
     color: #000;
     opacity: 0.8;
+}
+
+.petition-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    margin: 20px;
+}
+
+.petition-page .title {
+    text-align: center;
+    margin: 20px;
+}
+
+.petition-page .content {
+    display: flex;
+    justify-content: space-evenly;
+    max-width: 960px;
+}
+
+.petition-page .content img {
+    border-radius: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 20px;
+}
+
+.petition-page .content .left {
+    flex-grow: 2;
+    padding-right: 40px;
+}
+
+.petition-page .content .right {
+    flex-grow: 1;
+    flex-shrink: 0;
+}
+
+.create-button[type="submit"]:hover {
+    cursor: pointer;
+    background-color: #e4be00;
+    transition: all 0.2s ease-in-out;
+}
+
+.create-button[type="submit"] {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #fed500;
+    color: #000000;
+}
+
+.create-form {
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 2;
+}
+
+.create-form input {
+    min-width: 400px;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border-radius: 9px;
+    border: 2px solid #ccc;
+}
+
+textarea {
+    height: 150px;
+    min-width: 400px;
+    padding: 12px 20px;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 9px;
+    resize: none;
 }
