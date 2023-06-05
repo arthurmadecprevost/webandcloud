@@ -41,7 +41,7 @@ public class PetitionServlet extends HttpServlet {
 
 		// Create petition
 		for (int i = 0; i < 500; i++) {
-			Entity e = new Entity("Petition", "P" + i );
+			Entity e = new Entity("Petition");
             int owner=r.nextInt(1000);
             e.setProperty("createurId", "U"+ owner);
             e.setProperty("dateCreation", new Date());

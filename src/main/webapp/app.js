@@ -296,17 +296,37 @@ var CreateView = {
   };
 
 const PetitionView = {
+    pet: {
+        "key": {
+          "id": "",
+        },
+        "properties": {
+          "image": "",
+          "dateCreation": "",
+          "objectif": "",
+          "description": "",
+          "datetri": "",
+          "nom": "",
+          "nbVotants": "",
+          "createurId": "",
+          "tags": [],
+        }
+    },
+
     oninit: function (vnode) {
         return m.request({
             method: "GET",
             url: "_ah/api/petiQuik/v1/getPetition/"+vnode.attrs.id,
         }).then(function (result) {
-            var pet = result.items;
-            console.log("got:", pet);
-            // m.redraw();
+            PetitionView.pet = result; // Affecte le résultat à la propriété 'pet'
+            console.log("got:", PetitionView.pet);
+            m.redraw();
         })
     },
+
     view: function () {
+        var pet = PetitionView.pet; // Utilise la propriété 'pet' définie dans l'objet PetitionView
+
           return m(".petition-page", [
                 m("h1", {class: "title"}, pet.properties.nom),
                 m("div", {class: "content"}, [
@@ -346,7 +366,7 @@ var Petition = {
                 m("div.signature-count", vnode.attrs.properties.nbVotants + " signataires"),
             ]),
             m(".sign", [
-                m("a", { class: "button-small", href: "index_petiquik.html#!/petition/"+vnode.attrs.key.name }, "Signer"),
+                m("a", { class: "button-small", href: "index_petiquik.html#!/petition/"+vnode.attrs.key.id }, "Signer"),
             ])
         ]);
     },

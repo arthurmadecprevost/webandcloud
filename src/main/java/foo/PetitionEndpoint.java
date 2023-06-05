@@ -2,7 +2,6 @@ package foo;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,9 +22,7 @@ import com.google.api.server.spi.auth.EspAuthenticator;
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -42,19 +39,17 @@ import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Transaction;
 
-import foo.Petition;
-
 @Api(name = "petiQuik",
      version = "v1",
-     audiences = "",
-  	 clientIds = {""},
+     audiences = "115500541537-rapfqet1t2qmbv79oqc5dcfqdebopj1g.apps.googleusercontent.com",
+  	 clientIds = {"115500541537-rapfqet1t2qmbv79oqc5dcfqdebopj1g.apps.googleusercontent.com"},
      namespace =
      @ApiNamespace(
 		   ownerDomain = "helloworld.example.com",
 		   ownerName = "helloworld.example.com",
 		   packagePath = "")
      )
-
+     
 public class PetitionEndpoint {
 
 	@ApiMethod(name = "top100", httpMethod = HttpMethod.GET)
@@ -78,18 +73,6 @@ public class PetitionEndpoint {
 		return result;
 	}
 	
-	@ApiMethod(name = "old4", httpMethod = HttpMethod.GET)
-	public List<Entity> old4() {
-		Query q = new Query("Petition").addSort("datetri", SortDirection.ASCENDING);
-
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery pq = datastore.prepare(q);
-		
-		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(4));
-		return result;
-	}
-	
-	
 	@ApiMethod(name = "top4", httpMethod = HttpMethod.GET)
 	public List<Entity> top4() {
 		Query q = new Query("Petition").addSort("nbVotants", SortDirection.DESCENDING);
@@ -99,16 +82,7 @@ public class PetitionEndpoint {
 		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(4));
 		return result;
 	}
-	
-	@ApiMethod(name = "last4", httpMethod = HttpMethod.GET)
-	public List<Entity> last4() {
-		Query q = new Query("Petition").addSort("nbvotants", SortDirection.ASCENDING);
 
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(4));
-		return result;
-	}
 	
 	/**
 	 * 
@@ -126,36 +100,46 @@ public class PetitionEndpoint {
 		List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
 		return result;
 	}
-	
-	@ApiMethod(name = "mesSignatures", httpMethod = HttpMethod.GET)
-	public List<Entity> mesSignatures(Petition petition) {
-		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("votants",
-                Query.FilterOperator.EQUAL, petition.createur.getId().toString()));
 
+    /**
+     * 
+     
+    @ApiMethod(name = "getPetition", httpMethod = HttpMethod.GET)
+    //public List<Entity> getPetition(@Named("petition_id") String petitionid) {
+    public List<Entity> getPetition() {
+		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("name", 
+                Query.FilterOperator.EQUAL, "Ceci est une pétition de TEST."));
+		
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
+		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(1));
 		return result;
-	}
-	
-	@ApiMethod(name = "search", httpMethod = HttpMethod.GET)
-	public List<Entity> search(Petition petition) {
-		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("nom",
-                Query.FilterOperator.EQUAL, petition.nom.toString()));
+    }*/
 
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
-		return result;
-	}
-	
-	
+    @ApiMethod(name = "getPetition", path="getPetition/{petitionId}", httpMethod = HttpMethod.GET)
+    public Entity getPetition(@Named("petitionId") String petId) {
+            
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+        Key petitionKey = KeyFactory.createKey("Petition", Long.parseLong(petId));
+        Query.Filter keyFilter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.EQUAL, petitionKey);
+        Query petitionQuery = new Query("Petition").setFilter(keyFilter);
+    
+        Entity petition = datastore.prepare(petitionQuery).asSingleEntity();
+    
+        if (petition == null) {
+            return null;
+        }
+    
+        return petition;
+    }
+
     @ApiMethod(name = "addPetition", httpMethod = HttpMethod.POST)
 	public Entity addPetition(User user, Petition petition) throws Exception{ 
 		if (user == null) {
 			throw new UnauthorizedException("Invalid credentials");
 		}
-		Entity e = new Entity("Petition", Long.MAX_VALUE-(new Date()).getTime() +":" + user.getId());
+		Entity e = new Entity("Petition");
 		e.setProperty("description", petition.description);
         e.setProperty("nom", petition.nom);
         e.setProperty("image", petition.image);
@@ -175,41 +159,4 @@ public class PetitionEndpoint {
 		datastore.put(e);
 		return e;
 	}
-	
-	
-	  @ApiMethod(name = "signPetition", httpMethod = HttpMethod.POST) 
-	  public Entity signPetition(User user, Petition petition) throws Exception{
-		  if (user == null) {
-			  throw new UnauthorizedException("Invalid credentials");
-		  }
-		  DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		  Key id = KeyFactory.createKey("Petition", petition.id); 
-		  Entity pet = new Entity("Petition","a"); 
-		  Transaction transact =datastore.beginTransaction(); 
-		  pet = datastore.get(id); 
-		  int nbVotants = Integer.parseInt(pet.getProperty("nbvotants").toString());
-		  @SuppressWarnings("unchecked")
-		  ArrayList<String> votants = (ArrayList<String>) pet.getProperty("votants");
-		  if(votants == null) {
-			  votants = new ArrayList<>();
-		  }
-		  if(!votants.contains(petition.createur.getId())) {
-			  votants.add(petition.createur.getId());
-			  pet.setProperty("votants", votants); 
-			  pet.setProperty("nbvotants", nbVotants + 1 ); 
-		  }
-		  datastore.put(pet); 
-		  transact.commit(); 
-		  return pet;
-	 }
-	 
-	/**
-	private void changeNumberPetition(Key userKey, int increment) throws Exception {
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		Entity e = datastore.get(userKey);
-		Long numberPetitions = (Long)e.getProperty("numberPosts") + increment;
-		e.setProperty("numberPetitions", numberPetitions);
-		datastore.put(e);
-	}
-	 */
 }
