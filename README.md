@@ -1,94 +1,46 @@
-# fast install
 
-* precondition: you have a GCP project selected with billing activated. 
-* go to GCP console and open a cloud shell
-* git clone https://github.com/momo54/webandcloud.git
-* cd webandcloud
-* mvn appengine:deploy (to deploy)
-* mvn appengine:run (to debug in dev server)
+# Projet TinyPet (PétiQuik)
 
-# webandcloud from the lab
+Le projet PétiQuik (pour le retour de Groquik), est un projet réalisé sur Google App Engine. Il est constitué d'un Backend en Java et d'un front en Mithril.js.
 
-**Be sure your maven has access to the web**
-* you should have file ~/.m2/settings.xml
-* otherwise cp ~molli-p/.m2/settings.xml ~/.m2/
+### Liste des fonctionnalités
 
+- Affichage des pétitions paginée (limite de 50 par page)
+- Possibilité d'afficher les détails d'une pétition
+- Connexion avec Google
+- Signature d'une pétition en étant connecté
+- Création de pétitions (nom, description, objectif de votes, image, tags)
+- Affichage du profil avec listes des pétitions signées et créées
+- Endpoint permettant l'ajout de données de démonstration (/petition)
+
+### Les améliorations possibles
+
+- Correction du bouton Se connecter avec Google (il disparait de temps en temps, il faut rafraîchir la page).
+- Amélioration de la vue du Profil, avec ajout de pagination en cas de trop nombreuses pétitions signées/créées.
+- Connexion qui expire à chaque rafraîchissement de page (ajout d'un cookie? _miam_)
+- Ajout d'un système de recherche
+
+## Installation
+Vous devez avoir un compte Google Cloud Platform (GCP), et avoir un projet disponible.
+Dans ce projet, lancez Google App Engine et clonez ce répertoire Git.
+
+- Pensez à modifier vos audiences/clients id dans le fichier Java "PetitionEndpoint.java".
+
+- Pensez à modifier votre data-client_id dans le fichier app.js.
+
+- Configurez les index en utilisant la commande suivante, dans le répertoire racine :
+```bash
+gcloud datastore indexes create /main/webapp/WEB-INF/index.yaml
 ```
-molli-p@remote:~/.m2$ cat settings.xml
-<settings>
- <proxies>
- <proxy>
-      <active>true</active>
-      <protocol>https</protocol>
-      <host>proxy.ensinfo.sciences.univ-nantes.prive</host>
-      <port>3128</port>
-    </proxy>
-  </proxies>
-</settings>
-```
 
-## import and run in eclipse
-* install the code in your home:
-```
- cd ~
- git clone https://github.com/momo54/webandcloud.git
- cd webandcloud
- mvn install
-```
-* Change "sobike44" with your google project ID in pom.xml
-* Change "sobike44" with your google project ID in src/main/webapp/WEB-INF/appengine-web.xml
-
-## Run in eclipse
-
-* start an eclipse with gcloud plugin
-```
- /media/Enseignant/eclipse/eclipse
- or ~molli-p/eclipse/eclipse
- ```
-* import the maven project in eclipse
- * File/import/maven/existing maven project
- * browse to ~/webandcloud
- * select pom.xml
- * Finish and wait
- * Ready to deploy and run...
- ```
- gcloud app create error...
- ```
- Go to google cloud shell console (icon near your head in google console)
- ```
- gcloud app create
- ```
-
-
-## Install and Run 
-* (gcloud SDK must be installed first. see https://cloud.google.com/sdk/install)
- * the gcloud command should be in your path. Run the following command to initialize your local install of gcloud.
-```
-gcloud init
-```
-* git clone https://github.com/momo54/webandcloud.git
-* cd webandcloud
-* running local (http://localhost:8080):
-```
+- Compilez le code avec la commande suivante :
+```bash
 mvn package
-mvn appengine:run
-```
-* Deploying at Google (need gcloud configuration, see error message -> tell you what to do... 
-)
-```
-mvn appengine:deploy
-gcloud app browse
 ```
 
-# Access REST API
-* (worked before) 
-```
-https://<yourapp>.appstpot.com/_ah/api/explorer
-```
-* New version of endpoints (see https://cloud.google.com/endpoints/docs/frameworks/java/adding-api-management?hl=fr):
-```
-mvn clean package
-mvn endpoints-framework:openApiDocs
-gcloud endpoints services deploy target/openapi-docs/openapi.json 
+- Déployez le code avec la commande suivante :
+```bash
 mvn appengine:deploy
 ```
+
+- Rendez-vous sur https:// [ID_DE_VOTRE_PROJET] .ew.r.appspot.com]

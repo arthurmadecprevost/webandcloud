@@ -9,7 +9,7 @@
     <include path="/**.html" >
     </include>
     <include path="/**.js" >
-    </include>    
+    </include>
     <include path="/**.css" >
     </include>    
     <include path="/**.ico" >

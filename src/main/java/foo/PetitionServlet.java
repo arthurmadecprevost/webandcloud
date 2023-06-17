@@ -1,12 +1,10 @@
 package foo;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -17,66 +15,66 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.KeyRange;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
 
 @WebServlet(name = "PetServlet", urlPatterns = { "/petition" })
 public class PetitionServlet extends HttpServlet {
 
 	@Override
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-		response.setContentType("text/html");
-		response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
 
-		Random r = new Random();
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        Random r = new Random();
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-		// Create petition
-		for (int i = 0; i < 500; i++) {
-			Entity e = new Entity("Petition");
-            int owner=r.nextInt(1000);
+        // Create petition
+        for (int i = 0; i < 1000; i++) {
+            Entity e = new Entity("Petition");
+            int owner=r.nextInt(500);
             e.setProperty("createurId", "U"+ owner);
-            e.setProperty("dateCreation", new Date());
-            e.setProperty("nom", "Pour le retour de Groquik");
-            e.setProperty("description", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque pretium id elit eget dictum. Curabitur libero justo, posuere id rhoncus vel, elementum porttitor diam. Cras venenatis mauris eu augue rutrum, vitae accumsan nunc sodales. Sed luctus ligula nibh, hendrerit bibendum nisi maximus ac. Etiam faucibus rhoncus risus, id pellentesque neque. Etiam vel sollicitudin tellus, semper mollis lorem. Nam sit amet semper metus, non suscipit enim. Nullam sed hendrerit felis. Sed justo purus, pulvinar in enim at, aliquam finibus sem.");
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");  
+            Date date = new Date();
+            e.setProperty("dateCreation", formatter.format(date));
+            e.setProperty("nom", "["+i+"] Pétition pour le retour de Groquik");
+            e.setProperty("description", "Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression. Le Lorem Ipsum est le faux texte standard de l'imprimerie depuis les années 1500, quand un imprimeur anonyme assembla ensemble des morceaux de texte pour réaliser un livre spécimen de polices de texte. Il n'a pas fait que survivre cinq siècles, mais s'est aussi adapté à la bureautique informatique, sans que son contenu n'en soit modifié. Il a été popularisé dans les années 1960 grâce à la vente de feuilles Letraset contenant des passages du Lorem Ipsum, et, plus récemment, par son inclusion dans des applications de mise en page de texte, comme Aldus PageMaker.");
             e.setProperty("image", "https://picsum.photos/400/300");
-            e.setProperty("objectif", 10);
+            e.setProperty("objectif", i + 100);
 
             // Create random votants
             HashSet<String> fset = new HashSet<String>();
             for (int j=0;j<200;j++) {
-                fset.add("U" + r.nextInt(1000));
+                fset.add("U" + r.nextInt(500));
             }
             e.setProperty("votants", fset);
-            e.setProperty("nbVotants", fset.size());
-			
-			// Create random tags
-			HashSet<String> ftags = new HashSet<String>();
-			while (ftags.size() < 10) {
-				ftags.add("T" + r.nextInt(100));
-			}
-			e.setProperty("tags", ftags);
-			
-			datastore.put(e);
-			response.getWriter().print("<li> created post:" + e.getKey() + "<br>");
+            e.setProperty("nbVotants", i);
 
-		}
-		Entity e = new Entity("Petition", "P0");
-		try {
-			Entity f=datastore.get(e.getKey());
-			HashSet<String> al=(HashSet<String>) f.getProperty("votants");
-			System.out.println("myarray:"+al);
-		} catch (EntityNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-	}
+            // Create random tags
+            HashSet<String> ftags = new HashSet<String>();
+            while (ftags.size() < 100) {
+                ftags.add("T" + r.nextInt(200));
+            }
+            e.setProperty("tags", ftags);
+
+            datastore.put(e);
+        }
+
+        // Create utilisateurs
+        for(int i = 0; i < 1000; i++){
+            // Create one user to initialise the table in datastore 
+            Entity e = new Entity("Utilisateur");
+
+            // Create random signatures
+            HashSet<String> fSign = new HashSet<String>();
+            while (fSign.size() < 500) {
+                fSign.add("S" + r.nextInt(500));
+            }
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");  
+            Date date = new Date();
+            e.setProperty("creationDate", formatter.format(date));
+            e.setProperty("signatures", fSign);
+            e.setProperty("nomComplet", "Jean Bon");
+            datastore.put(e);
+        }
+    }
 }

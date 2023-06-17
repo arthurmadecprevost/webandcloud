@@ -139,6 +139,7 @@ nav a:hover {
     margin-right: auto;
     max-width: 80%;
     padding: 0 20px;
+    margin-bottom: 40px;
 }
 
 .petitions h2 {
@@ -186,6 +187,7 @@ nav a:hover {
     flex-direction: column;
     justify-content: center;
     max-width: 70%;
+    min-width: 70%;
 }
 
 .petition-content h3 {
@@ -321,6 +323,7 @@ footer a:hover {
     color: #333;
     text-decoration: none;
     transition: all 0.2s ease-in-out;
+    margin-left: 20px;
 }
 
 .profile-petitions-list a:hover {
