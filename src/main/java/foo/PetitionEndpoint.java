@@ -70,68 +70,50 @@ public class PetitionEndpoint {
             utilisateurEntity = new Entity("Utilisateur", user.getId());
             utilisateurEntity.setProperty("nomComplet", user.name);
             utilisateurEntity.setProperty("signatures", new ArrayList<String>());
+            utilisateurEntity.setProperty("creationDate", LocalDate.now());
             datastore.put(utilisateurEntity);
         }
 
 		return utilisateurEntity;
 	}
 
-	@ApiMethod(name = "top100", httpMethod = HttpMethod.GET)
-	public List<Entity> top100() {
-		Query q = new Query("Petition").addSort("nbVotants", SortDirection.DESCENDING);
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
-  
-		return result;
-	}
-
-    @ApiMethod(name = "top50Paginated", httpMethod = HttpMethod.GET)
-	public List<Entity> top50Paginated(@Named("page") int page) {
+    @ApiMethod(name = "top50Paginated", path="getPetitions/{pageId}", httpMethod = HttpMethod.GET)
+	public List<Entity> top50Paginated(@Named("pageId") int page) {
         int index = (page - 1) * 50;
 		Query q = new Query("Petition").addSort("nbVotants", SortDirection.DESCENDING);
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+		// Mise en place de projection pour optimiser la requete
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        query.addProjection(new PropertyProjection("nom", String));
+        query.addProjection(new PropertyProjection("description", String));
+        query.addProjection(new PropertyProjection("image", String));
 		PreparedQuery pq = datastore.prepare(q);
 		List<Entity> result = pq.asList(FetchOptions.Builder.withOffset(index).limit(50));
 		return result;
 	}
-	
-	@ApiMethod(name = "new4", httpMethod = HttpMethod.GET)
-	public List<Entity> new4() {
-		Query q = new Query("Petition").addSort("datetri", SortDirection.DESCENDING);
 
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery pq = datastore.prepare(q);
-		
-		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(4));
-		return result;
-	}
-	@ApiMethod(name = "top4", httpMethod = HttpMethod.GET)
-	public List<Entity> top4() {
-		Query q = new Query("Petition").addSort("nbVotants", SortDirection.DESCENDING);
-
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(4));
-		return result;
-	}
-	
-	/**
-	 * 
+    /**
 	 * @param user User
 	 * @return Une liste de pétitions
 	 * @throws UnauthorizedException
 	 */
 	@ApiMethod(name = "mesPetitions", httpMethod = HttpMethod.GET)
-	public List<Entity> mesPetitions(User user, @Named("page") int page) throws UnauthorizedException {
+	public List<Entity> mesPetitions(User user, PostMessage pm) throws UnauthorizedException {
         if (user == null) {
 			throw new UnauthorizedException("Invalid credentials");
 		}
+
+        int page = Integer.parseInt(pm.body);
         int index = (page - 1) * 50;
-		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("owner",
+		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("createurId",
                 Query.FilterOperator.EQUAL, user.getId()));
 		
+		// Mise en place de projection pour optimiser la requete
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        query.addProjection(new PropertyProjection("nom", String.class));
+        query.addProjection(new PropertyProjection("description", String.class));
+        query.addProjection(new PropertyProjection("image", String.class));
+        query.addProjection(new PropertyProjection("nbVotants", Long.class));
 		PreparedQuery pq = datastore.prepare(q);
 		List<Entity> result = pq.asList(FetchOptions.Builder.withOffset(index).limit(50));
 		return result;
@@ -149,16 +131,24 @@ public class PetitionEndpoint {
     
         // Récuperation de l'utilisateur
         Entity petition = datastore.prepare(petitionQuery).asSingleEntity();
-        Query q = new Query("Utilisateur").setFilter(new Query.FilterPredicate("id",
-                Query.FilterOperator.EQUAL, petition.getProperty("createurId")));
+        
+        Key userKey = KeyFactory.createKey("Utilisateur", (String) petition.getProperty("createurId"));
+        Query q = new Query("Utilisateur").setFilter(new Query.FilterPredicate(Entity.KEY_RESERVED_PROPERTY,
+                Query.FilterOperator.EQUAL, userKey));
         Entity utilisateur = datastore.prepare(q).asSingleEntity();
 
+        String fullName;
+        try {
+            fullName = (String) utilisateur.getProperty("nomComplet");
+        } catch (NullPointerException e) {
+            fullName = "Utilisateur inexistant";
+        }
+
         // On modifie la propriété full name pour l'afficher dans le front
-        petition.setProperty("nomCreateur", utilisateur.getProperty("nomComplet"));
+        petition.setProperty("nomCreateur", fullName);
 
         return petition;
     }
-
 	@ApiMethod(name = "mesSignatures", httpMethod = HttpMethod.GET)
 	public List<Entity> mesSignatures(User user, @Named("page") int page) throws UnauthorizedException {
         if (user == null) {
@@ -173,14 +163,13 @@ public class PetitionEndpoint {
         List<String> petitionSignees = (List<String>) utilisateur.getProperty("signatures");
 
         // Requetage avec index pour ne pas renvoyer toutes les pétitions signées
-        Query q2 = new Query("Petition").addSort("nbvotants", SortDirection.DESCENDING);
-        int index = (page - 1) * 50;
-        int indexPrecedent = index - 50;
-        for(int i = indexPrecedent; i < index; i++)
+        int index = page * 10;
+        int indexPrecedent = index - 10;  
+        int limite = petitionSignees.size() < index ? petitionSignees.size() : index;
+        for(int i = indexPrecedent; i < limite; i++)
         {
             Key key = KeyFactory.createKey("Petition", petitionSignees.get(i));
-            Query petitionQuery = new Query("Petition").setFilter(new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.EQUAL, key));
-            result.add(datastore.prepare(petitionQuery).asSingleEntity());
+            result.add(petitionEntity = datastore.get(key));
         }
 		return result;
 	}
@@ -188,16 +177,22 @@ public class PetitionEndpoint {
 	@ApiMethod(name = "search", httpMethod = HttpMethod.GET)
 	public List<Entity> search(Petition petition) {
 		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("nom",
-                Query.FilterOperator., petition.nom.toString()));
+                Query.FilterOperator.IN, petition.nom.toString()));
 
+		// Mise en place de projection pour optimiser la requete
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        query.addProjection(new PropertyProjection("nom", String.class));
+        query.addProjection(new PropertyProjection("description", String.class));
+        query.addProjection(new PropertyProjection("image", String.class));
+        query.addProjection(new PropertyProjection("nbVotants", Long.class));
+
 		PreparedQuery pq = datastore.prepare(q);
 		List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
 		return result;
 	}
 	
 	
-	@ApiMethod(name = "addPetition", httpMethod = HttpMethod.POST)
+    @ApiMethod(name = "addPetition", httpMethod = HttpMethod.POST)
 	public Entity addPetition(User user, Petition petition) throws Exception{ 
 		if (user == null) {
 			throw new UnauthorizedException("Invalid credentials");
@@ -210,32 +205,34 @@ public class PetitionEndpoint {
 		e.setProperty("nbVotants", 0);
 		e.setProperty("objectif", petition.objectif);
 		e.setProperty("votants", new ArrayList<>());
-
 		
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");  
 	    Date date = new Date();  
 	    e.setProperty("datetri", date.getTime());
 		e.setProperty("dateCreation", formatter.format(date));
-		e.setProperty("tags", petition.tags);
+        
+        String[] valuesArray = petition.tags.split(",");
+        List<String> valuesList = Arrays.asList(valuesArray);
+		e.setProperty("tags", valuesList);
 		
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		datastore.put(e);
 		return e;
 	}
 
-	@ApiMethod(name = "signPetition", httpMethod = HttpMethod.POST) 
-	public Entity signPetition(User user, Petition petition) throws Exception{
+	@ApiMethod(name = "signPetition", path = "signPetition/{userID}/{petitionId}", httpMethod = HttpMethod.PUT) 
+	public Entity signPetition(@Named("userID") String user, @Named("petitionId") String petId) throws Exception{
 		if (user == null) {
 			throw new UnauthorizedException("Invalid credentials");
 		}
-		if(petition == null){
+		if(petId == null){
 		    throw new IllegalArgumentException("La pétition ne peut pas être nulle.");
 		}
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
         // Definition des clés et des entités
-        Key petitionId = KeyFactory.createKey("Petition", petition.id); 
-        Key utilisateurId = KeyFactory.createKey("Utilisateur", user.getId()); 
+        Key petitionId = KeyFactory.createKey("Petition", Long.parseLong(petId)); 
+        Key utilisateurId = KeyFactory.createKey("Utilisateur", user); 
         Entity petitionEntity = null; 
         Entity utilisateurEntity;
 
@@ -248,23 +245,28 @@ public class PetitionEndpoint {
 
             // Récuperation des propriétés à modifier
             ArrayList<String> signatures = (ArrayList<String>)utilisateurEntity.getProperty("signatures");          
-            int nbVotants = (int)petitionEntity.getProperty("nbVotants");
+            long nbVotants = (long) petitionEntity.getProperty("nbVotants");
             ArrayList<String> votants = (ArrayList<String>) petitionEntity.getProperty("votants");
             if(votants == null) {
                 votants = new ArrayList<>();
             }
+            if(signatures == null) {
+                signatures = new ArrayList<>();
+            }
 
             // Modification des propriétés des pétitions si l'utilisateur n'a pas déjà signé
-            if(!votants.contains(petition.createurId)) {
-                votants.add(petition.createurId);
+            if(!votants.contains(user)) {
+                votants.add(user);
                 petitionEntity.setProperty("votants", votants); 
                 petitionEntity.setProperty("nbVotants", nbVotants + 1 ); 
             }
 
             // Modification des propriétés de l'utilisateur si la pétition n'est pas déjà dans ses signatures
-            if(!signatures.contains(petition.id)) {
-                signatures.add((String)petitionEntity.getProperty("id"));
+            if(!signatures.contains(petId)) {
+                signatures.add(petId);
+                utilisateurEntity.setProperty("signatures", signatures);
             }
+
             datastore.put(utilisateurEntity);
             datastore.put(petitionEntity); 
             transact.commit(); 
