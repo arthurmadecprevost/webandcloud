@@ -405,3 +405,9 @@ textarea {
     border-radius: 9px;
     resize: none;
 }
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

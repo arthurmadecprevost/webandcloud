@@ -37,7 +37,7 @@ var Header = {
                 m("nav", [
                     m("ul", [
                         m("li", m("a", { href: "index_petiquik.html#!/home" }, "Accueil")),
-                        m("li", m("a", { href: "index_petiquik.html#!/petitions" }, "Pétitions")),
+                        m("li", m("a", { href: "index_petiquik.html#!/petitions/1" }, "Pétitions")),
                         m("li", m("a", { href: "index_petiquik.html#!/create" }, "Nouvelle pétition")),
                         m("li", m("a", { href: "#" }, "Blog")),
                         m("li", m("a", { href: "#" }, "Nous Contacter")),
@@ -64,7 +64,7 @@ var Header = {
                 m("nav", [
                     m("ul", [
                         m("li", m("a", { href: "index_petiquik.html#!/home" }, "Accueil")),
-                        m("li", m("a", { href: "index_petiquik.html#!/petitions" }, "Pétitions")),
+                        m("li", m("a", { href: "index_petiquik.html#!/petitions/1" }, "Pétitions")),
                         m("li", m("a", { href: "#" }, "Blog")),
                         m("li", m("a", { href: "#" }, "Nous Contacter")),
                     ]),
@@ -129,11 +129,27 @@ var allPetitions = {
             url: "_ah/api/petiQuik/v1/top100/"
         }).then(function (result) {
             allPetitions.list = result.items;
-            console.log("got:", result.items);
+            console.log("allPetitions.list got:", result.items);
             // m.redraw();
         })
     },
 };
+
+var petitionPage = {
+    list: [],
+    loadList: function(pageId) {
+        if (pageId > 0) {
+            return m.request({
+                method: "GET",
+                url: "_ah/api/petiQuik/v1/getPetitions/"+pageId
+            }).then(function (result) {
+                petitionPage.list = result.items;
+                console.log("petitionPage.list (page "+pageId+") got:", result.items);
+                //m.redraw();
+            })
+        }
+    }
+}
 
 var popularPetitions = {
     list: [],
@@ -189,6 +205,46 @@ var AllPetitionsView = {
     },
 };
 
+var PaginatedPetitionView = {
+    oninit: function(vnode) {
+        petitionPage.loadList(vnode.attrs.pageId);
+    },
+
+    view: function (vnode) {
+        console.log("vnode="+vnode);
+        console.log("pageId="+vnode.attrs.pageId);
+        var pagination = m(".pagination", [
+            m("a", { class: "button-small", onclick: function() {petitionPage.loadList((parseInt(vnode.attrs.pageId,10)-1)); console.log("petitionPage.loadList("+(parseInt(vnode.attrs.pageId,10)-1)+")");}, href: "index_petiquik.html#!/petitions/"+(parseInt(vnode.attrs.pageId,10)-1) }, "Page précédente"),
+            m("p", {"style":"margin:20px"}, "Page "+vnode.attrs.pageId),
+            m("a", { class: "button-small", onclick: function() {petitionPage.loadList((parseInt(vnode.attrs.pageId,10)+1));console.log("petitionPage.loadList("+(parseInt(vnode.attrs.pageId,10)+1)+")");}, href: "index_petiquik.html#!/petitions/"+(parseInt(vnode.attrs.pageId,10)+1) }, "Page suivante"),
+          ]);
+          
+          if(petitionPage.list.length < 50) {
+            var pagination = m(".pagination", [
+              m("a", { class: "button-small", onclick: function() {petitionPage.loadList((parseInt(vnode.attrs.pageId,10)-1));console.log("petitionPage.loadList("+(parseInt(vnode.attrs.pageId,10)-1)+")");}, href: "index_petiquik.html#!/petitions/"+(parseInt(vnode.attrs.pageId,10)-1) }, "Page précédente"),
+              m("p", {"style":"margin:20px"}, "Page "+vnode.attrs.pageId)
+            ]);
+          } 
+          
+          if (vnode.attrs.pageId == 1) {
+            var pagination = m(".pagination", [
+              m("p", {"style":"margin:20px"}, "Page "+vnode.attrs.pageId),
+              m("a", { class: "button-small", onclick: function() {petitionPage.loadList((parseInt(vnode.attrs.pageId,10)+1));console.log("petitionPage.loadList("+(parseInt(vnode.attrs.pageId,10)+1)+")");}, href: "index_petiquik.html#!/petitions/"+(parseInt(vnode.attrs.pageId,10)+1) }, "Page suivante"),
+            ]);
+          }
+          
+
+        return m(".petitions", [
+            m("h2", "Nos pétitions (page "+vnode.attrs.pageId+")"),
+            m("ul", petitionPage.list.map(function (petition) {
+                return m(Petition, petition);
+            })),
+            pagination,
+        ]);
+    },
+};
+
+
 const ProfileView = {
     oninit: myPetitions.loadList,
     view: function (vnode) {
@@ -222,7 +278,7 @@ var CreateView = {
     description: "",
     objective: 1,
     picture: "",
-    tags: [],
+    tags: "",
   
     submitForm: function () {
         var pet = {
@@ -286,8 +342,8 @@ var CreateView = {
     
             m("label", "Tags (séparés par des virgules)"),
             m("input[type=text]", {
-            value: CreateView.tags.join(","),
-            oninput: function (e) { CreateView.tags = e.target.value.split(","); },
+            value: CreateView.tags,
+            oninput: function (e) { CreateView.tags = e.target.value; },
             required: true,
             }),
             
@@ -413,10 +469,12 @@ var HomePage = {
 };
 
 var AllPetitionsPage = {
-    view: function () {
+    view: function (vnode) {
+        var pageId = vnode.attrs.pageId;
+        
         return m("body", [
             m(Header),
-            m(AllPetitionsView),
+            m(PaginatedPetitionView, {pageId : pageId}),
             m(Footer),
         ]);
     },
@@ -464,7 +522,7 @@ var CreatePage = {
 
 m.route(document.body, "/home", {
     "/home": HomePage,
-    "/petitions": AllPetitionsPage,
+    "/petitions/:pageId": AllPetitionsPage,
     "/profile": ProfilePage,
     "/petition/:id": PetitionPage,
     "/create": CreatePage,

@@ -134,7 +134,7 @@ public class PetitionEndpoint {
         return petition;
     }
 
-    @ApiMethod(name = "addPetition", httpMethod = HttpMethod.POST)
+     @ApiMethod(name = "addPetition", httpMethod = HttpMethod.POST)
 	public Entity addPetition(User user, Petition petition) throws Exception{ 
 		if (user == null) {
 			throw new UnauthorizedException("Invalid credentials");
@@ -147,13 +147,15 @@ public class PetitionEndpoint {
 		e.setProperty("nbVotants", 0);
 		e.setProperty("objectif", petition.objectif);
 		e.setProperty("votants", new ArrayList<>());
-
 		
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");  
 	    Date date = new Date();  
 	    e.setProperty("datetri", date.getTime());
 		e.setProperty("dateCreation", formatter.format(date));
-		e.setProperty("tags", petition.tags);
+        
+        String[] valuesArray = petition.tags.split(",");
+        List<String> valuesList = Arrays.asList(valuesArray);
+		e.setProperty("tags", valuesList);
 		
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		datastore.put(e);
