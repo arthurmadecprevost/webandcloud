@@ -68,7 +68,7 @@ public class PetitionEndpoint {
         Entity utilisateurEntity = datastore.get(utilisateurId);
         if(utilisateurEntity == null){
             utilisateurEntity = new Entity("Utilisateur", user.getId());
-            utilisateurEntity.setProperty("fullName", user.name);
+            utilisateurEntity.setProperty("nomComplet", user.name);
             utilisateurEntity.setProperty("signatures", new ArrayList<String>());
             datastore.put(utilisateurEntity);
         }
@@ -78,7 +78,7 @@ public class PetitionEndpoint {
 
 	@ApiMethod(name = "top100", httpMethod = HttpMethod.GET)
 	public List<Entity> top100() {
-		Query q = new Query("Petition").addSort("nbvotants", SortDirection.DESCENDING);
+		Query q = new Query("Petition").addSort("nbVotants", SortDirection.DESCENDING);
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
 		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
@@ -89,7 +89,7 @@ public class PetitionEndpoint {
     @ApiMethod(name = "top50Paginated", httpMethod = HttpMethod.GET)
 	public List<Entity> top50Paginated(@Named("page") int page) {
         int index = (page - 1) * 50;
-		Query q = new Query("Petition").addSort("nbvotants", SortDirection.DESCENDING);
+		Query q = new Query("Petition").addSort("nbVotants", SortDirection.DESCENDING);
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
 		List<Entity> result = pq.asList(FetchOptions.Builder.withOffset(index).limit(50));
@@ -108,7 +108,7 @@ public class PetitionEndpoint {
 	}
 	@ApiMethod(name = "top4", httpMethod = HttpMethod.GET)
 	public List<Entity> top4() {
-		Query q = new Query("Petition").addSort("nbvotants", SortDirection.DESCENDING);
+		Query q = new Query("Petition").addSort("nbVotants", SortDirection.DESCENDING);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
@@ -142,11 +142,19 @@ public class PetitionEndpoint {
             
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
+        // Récuperation de la pétition
         Key petitionKey = KeyFactory.createKey("Petition", Long.parseLong(petId));
         Query.Filter keyFilter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.EQUAL, petitionKey);
         Query petitionQuery = new Query("Petition").setFilter(keyFilter);
     
+        // Récuperation de l'utilisateur
         Entity petition = datastore.prepare(petitionQuery).asSingleEntity();
+        Query q = new Query("Utilisateur").setFilter(new Query.FilterPredicate("id",
+                Query.FilterOperator.EQUAL, petition.getProperty("createurId")));
+        Entity utilisateur = datastore.prepare(q).asSingleEntity();
+
+        // On modifie la propriété full name pour l'afficher dans le front
+        petition.setProperty("nomCreateur", utilisateur.getProperty("nomComplet"));
 
         return petition;
     }
@@ -163,6 +171,7 @@ public class PetitionEndpoint {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		Entity utilisateur = datastore.prepare(q).asSingleEntity();
         List<String> petitionSignees = (List<String>) utilisateur.getProperty("signatures");
+
         // Requetage avec index pour ne pas renvoyer toutes les pétitions signées
         Query q2 = new Query("Petition").addSort("nbvotants", SortDirection.DESCENDING);
         int index = (page - 1) * 50;
@@ -179,7 +188,7 @@ public class PetitionEndpoint {
 	@ApiMethod(name = "search", httpMethod = HttpMethod.GET)
 	public List<Entity> search(Petition petition) {
 		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("nom",
-                Query.FilterOperator.EQUAL, petition.nom.toString()));
+                Query.FilterOperator., petition.nom.toString()));
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
