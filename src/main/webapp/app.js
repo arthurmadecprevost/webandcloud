@@ -20,7 +20,9 @@ var Login = {
         //DiceGame.name = responsePayload.name
         Login.name = responsePayload.name
         Login.email = responsePayload.email
-        Login.ID = response.credential
+        Login.ID = responsePayload.sub
+        Login.credential = response.credential
+        //Login.ID = response.credential
         Login.picture = responsePayload.picture
         // external event
         m.redraw()
@@ -152,7 +154,7 @@ var myPetitions = {
     loadList: function () {
         return m.request({
             method: "GET",
-            url: "_ah/api/petiQuik/v1/mesPetitions"+'?access_token='+Login.ID
+            url: "_ah/api/petiQuik/v1/mesPetitions"+'?access_token='+Login.credential
         }).then(function (result) {
             myPetitions.list = result.items;
             console.log("myPetitions.list:", result.items);
@@ -233,7 +235,7 @@ var CreateView = {
         console.log("Données du formulaire :", pet);
         return m.request({
             method: "POST",
-            url: "_ah/api/petiQuik/v1/addPetition"+'?access_token='+Login.ID,
+            url: "_ah/api/petiQuik/v1/addPetition"+'?access_token='+Login.credential,
             params: pet,
         })
         .then(function(result) {
@@ -313,6 +315,24 @@ const PetitionView = {
     },
 
     oninit: function (vnode) {
+        if (vnode.attrs.id != PetitionView.pet.key.id) {
+            pet = {
+                "key": {
+                  "id": "",
+                },
+                "properties": {
+                  "image": "",
+                  "dateCreation": "",
+                  "objectif": "",
+                  "description": "",
+                  "datetri": "",
+                  "nom": "",
+                  "nbVotants": "",
+                  "createurId": "",
+                  "tags": [],
+                }
+            };            
+        };
         return m.request({
             method: "GET",
             url: "_ah/api/petiQuik/v1/getPetition/"+vnode.attrs.id,
