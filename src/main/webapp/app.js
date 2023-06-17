@@ -24,8 +24,15 @@ var Login = {
         Login.credential = response.credential
         //Login.ID = response.credential
         Login.picture = responsePayload.picture
+        fullName = Login.name;
+        
+        m.request({
+            method: "GET",
+            url: "_ah/api/petiQuik/v1/checkCreatedUser?access_token="+Login.credential
+        }).then(function (result) {
+            m.redraw()
+        })
         // external event
-        m.redraw()
     }
 }
 
@@ -53,7 +60,7 @@ var Header = {
                         m("button", { type: "submit" }, "Rechercher"),
                     ]),
                 ]),
-                m("a", { class: "header-profile", href: "index_petiquik.html#!/profile" }, [
+                m("a", { class: "header-profile", href: "index_petiquik.html#!/profile/1/1" }, [
                     m("img", { class: "profile-pic", src: Login.picture }),
                     m("p", { style: "margin-left:20px" }, Login.name),
                 ]),
@@ -167,13 +174,31 @@ var popularPetitions = {
 
 var myPetitions = {
     list: [],
-    loadList: function () {
+    loadList: function (myPetsId) {
+        var data = {'body': myPetsId};
         return m.request({
             method: "GET",
-            url: "_ah/api/petiQuik/v1/mesPetitions"+'?access_token='+Login.credential
+            url: "_ah/api/petiQuik/v1/mesPetitions"+'?access_token='+encodeURIComponent(Login.credential),
+            params: data
         }).then(function (result) {
             myPetitions.list = result.items;
             console.log("myPetitions.list:", result.items);
+            // m.redraw();
+        })
+    },
+}
+
+var signedPetitions = {
+    list: [],
+    loadList: function (signedPetsId) {
+        var data = {'body':signedPetsId};
+        return m.request({
+            method: "GET",
+            url: "_ah/api/petiQuik/v1/mesSignatures"+'?access_token='+encodeURIComponent(Login.credential),
+            params: data,
+        }).then(function (result) {
+            signedPetitions.list = result.items;
+            console.log("signedPetitions.list:", result.items);
             // m.redraw();
         })
     },
@@ -246,10 +271,8 @@ var PaginatedPetitionView = {
 
 
 const ProfileView = {
-    oninit: myPetitions.loadList,
     view: function (vnode) {
         const user = vnode.attrs.user;
-        const petitions = myPetitions.list;
 
         return m('.div', [
             m('.profile-card', [
@@ -260,14 +283,6 @@ const ProfileView = {
                     m('h2.profile-name', user.name),
                     m('p.profile-date', 'Membre depuis ' + user.joinDate),
                 ]),
-            ]),
-            m('div', [
-                 m('h3.profile-petitions-header', 'Pétitions signées'),
-                m('ul.profile-petitions-list', petitions.map(function (petition) {
-                    return m('li', [
-                        m('a', { href: petition.url }, petition.title)
-                    ])
-                }))
             ])
         ]);
     }
@@ -296,7 +311,6 @@ var CreateView = {
         })
         .then(function(result) {
             console.log("created:",result)
-            myPetitions.loadList()
         })
     },
   
@@ -352,6 +366,40 @@ var CreateView = {
     }
   };
 
+  var MyPetitionsView = {
+    oninit: function(vnode) {
+        myPetitions.loadList(vnode.attrs.myPetsId);
+    },
+    view: function() {
+        return m('div', [
+            m('h3.profile-petitions-header', 'Mes pétitions'),
+            m('ul.profile-petitions-list', myPetitions.list.map(function (petition) {
+                return m('li', [
+                    m('a', { href: petition.url }, petition.title)
+                ])
+           }))
+       ]);
+    }
+  }
+
+  var SignedPetitionsView = {
+    oninit: function(vnode) {
+        signedPetitions.loadList(vnode.attrs.signedPetsId);
+    },
+    view: function() {
+        var petitions = signedPetitions.list;
+
+        return m('div', [
+            m('h3.profile-petitions-header', 'Pétitions signées'),
+            m('ul.profile-petitions-list', petitions.map(function (petition) {
+                return m('li', [
+                    m('a', { href: petition.url }, petition.title)
+                ])
+           }))
+       ]);
+    }
+  }
+
 const PetitionView = {
     pet: {
         "key": {
@@ -367,6 +415,7 @@ const PetitionView = {
           "nbVotants": "",
           "createurId": "",
           "tags": [],
+          "nomCreateur":"",
         }
     },
 
@@ -386,6 +435,7 @@ const PetitionView = {
                   "nbVotants": "",
                   "createurId": "",
                   "tags": [],
+                  "nomCreateur":"",
                 }
             };            
         };
@@ -397,6 +447,28 @@ const PetitionView = {
             console.log("got:", PetitionView.pet);
             m.redraw();
         })
+    },
+
+    sign: function () {
+        if (PetitionView.pet.key.id != "") {
+            var pet = {
+                id: PetitionView.pet.key.id,
+                nom: PetitionView.pet.properties.nom,
+                description: PetitionView.pet.properties.description,
+                image: PetitionView.pet.properties.image,
+                tags: PetitionView.pet.properties.tags,
+                objectif: PetitionView.pet.properties.objectif
+            };
+
+            console.log("Données signature :", PetitionView.pet.key.id);
+            return m.request({
+                method: "PUT",
+                url: "_ah/api/petiQuik/v1/signPetition/"+Login.ID+"/"+PetitionView.pet.key.id,
+            })
+            .then(function(result) {
+                console.log("signed:",result)
+            })
+        }       
     },
 
     view: function () {
@@ -411,9 +483,10 @@ const PetitionView = {
                     ]),
                     m("div", {class: "right"}, [
                         m("div", {style:"padding-bottom:20px;"},"Il y a actuellement "+pet.properties.nbVotants + " signataires, objectif "+ pet.properties.objectif+" !"),
-                        m(".sign", [
-                            m("a", { class: "button-small", href: "index_petiquik.html#!/petitions", style:"width:100%; text-align:center; font-weight:bold;" }, "Signer la pétition"),
-                        ]),
+                        Login.credential ? m(".sign", [
+                            m("a", { class: "button-small", onclick: PetitionView.sign, style: "width:100%; text-align:center; font-weight:bold;" }, "Signer la pétition"),
+                        ]) : m("p", "Connectez-vous pour signer la pétition."),
+                        m("p", pet.properties.nomCreateur),
                         m(".tags", {style: "margin-top:10px"}, [
                             m("h3", "Tags"),
                             m("li",pet.properties.tags.join(", "))
@@ -481,11 +554,15 @@ var AllPetitionsPage = {
 };
 
 var ProfilePage = {
-    view: function () {
+    view: function (vnode) {
+        var myPetsId = vnode.attrs.myPetsId;
+        var signedPetsId = vnode.attrs.signedPetsId;
         if (Login.ID) {
             return m("body", [
                 m(Header),
                 m(ProfileView, { user: Login, petitions: popularPetitions.list }),
+                m(MyPetitionsView, { myPetsId: myPetsId }),
+                m(SignedPetitionsView, { signedPetsId: signedPetsId }),
                 m(Footer)
             ]);
         } else {
@@ -523,7 +600,7 @@ var CreatePage = {
 m.route(document.body, "/home", {
     "/home": HomePage,
     "/petitions/:pageId": AllPetitionsPage,
-    "/profile": ProfilePage,
+    "/profile/:myPetsId/:signedPetsId": ProfilePage,
     "/petition/:id": PetitionPage,
     "/create": CreatePage,
 })
