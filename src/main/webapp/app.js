@@ -29,7 +29,7 @@ var Login = {
 
 var Header = {
     view: function () {
-        if (Login.name) {
+        if (Login.ID) {
             return m("header", [
                 m(".logo", "PétiQuik"),
                 m("nav", [
@@ -63,7 +63,6 @@ var Header = {
                     m("ul", [
                         m("li", m("a", { href: "index_petiquik.html#!/home" }, "Accueil")),
                         m("li", m("a", { href: "index_petiquik.html#!/petitions" }, "Pétitions")),
-                        m("li", m("a", { href: "index_petiquik.html#!/create" }, "Nouvelle pétition")),
                         m("li", m("a", { href: "#" }, "Blog")),
                         m("li", m("a", { href: "#" }, "Nous Contacter")),
                     ]),
@@ -298,7 +297,7 @@ var CreateView = {
 const PetitionView = {
     pet: {
         "key": {
-          "id": "",
+          "id": "5632499082330112",
         },
         "properties": {
           "image": "",
