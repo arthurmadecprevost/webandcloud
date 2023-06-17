@@ -123,16 +123,17 @@ public class PetitionEndpoint {
 	 * @throws UnauthorizedException
 	 */
 	@ApiMethod(name = "mesPetitions", httpMethod = HttpMethod.GET)
-	public List<Entity> mesPetitions(User user) throws UnauthorizedException {
+	public List<Entity> mesPetitions(User user, @Named("page") int page) throws UnauthorizedException {
         if (user == null) {
 			throw new UnauthorizedException("Invalid credentials");
 		}
+        int index = (page - 1) * 50;
 		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("owner",
                 Query.FilterOperator.EQUAL, user.getId()));
 		
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
+		List<Entity> result = pq.asList(FetchOptions.Builder.withOffset(index).limit(50));
 		return result;
 	}
 
@@ -146,7 +147,7 @@ public class PetitionEndpoint {
         Query petitionQuery = new Query("Petition").setFilter(keyFilter);
     
         Entity petition = datastore.prepare(petitionQuery).asSingleEntity();
-        
+
         return petition;
     }
 
@@ -161,12 +162,17 @@ public class PetitionEndpoint {
         
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		Entity utilisateur = datastore.prepare(q).asSingleEntity();
-
+        List<String> petitionSignees = (List<String>) utilisateur.getProperty("signatures");
         // Requetage avec index pour ne pas renvoyer toutes les pétitions signées
         Query q2 = new Query("Petition").addSort("nbvotants", SortDirection.DESCENDING);
-        int index = (page - 1) * 25;
-        PreparedQuery pq = datastore.prepare(q2);
-        pq.asList(FetchOptions.Builder.withOffset(index).limit(25));
+        int index = (page - 1) * 50;
+        int indexPrecedent = index - 50;
+        for(int i = indexPrecedent; i < index; i++)
+        {
+            Key key = KeyFactory.createKey("Petition", petitionSignees.get(i));
+            Query petitionQuery = new Query("Petition").setFilter(new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.EQUAL, key));
+            result.add(datastore.prepare(petitionQuery).asSingleEntity());
+        }
 		return result;
 	}
 	
