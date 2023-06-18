@@ -43,7 +43,8 @@ var Header = {
                     m("ul", [
                         m("li", m("a", { href: "index_petiquik.html#!/home" }, "Accueil")),
                         m("li", m("a", { href: "index_petiquik.html#!/petitions/1" }, "Pétitions")),
-                        m("li", m("a", { href: "index_petiquik.html#!/create" }, "Nouvelle pétition"))
+                        m("li", m("a", { href: "index_petiquik.html#!/create" }, "Nouvelle pétition")),
+                        m("li", m("a", { href: "index_petiquik.html#!/search" }, "Rechercher une pétition")),
                     ]),
                 ]),
                 m("a", { class: "header-profile", href: "index_petiquik.html#!/profile" }, [
@@ -57,7 +58,8 @@ var Header = {
                 m("nav", [
                     m("ul", [
                         m("li", m("a", { href: "index_petiquik.html#!/home" }, "Accueil")),
-                        m("li", m("a", { href: "index_petiquik.html#!/petitions/1" }, "Pétitions"))
+                        m("li", m("a", { href: "index_petiquik.html#!/petitions/1" }, "Pétitions")),
+                        m("li", m("a", { href: "index_petiquik.html#!/search" }, "Rechercher une pétition")),
                     ]),
                 ]),
                 m("div", {
@@ -404,7 +406,7 @@ var CreateView = {
     }
   }
 
-const PetitionView = {
+var PetitionView = {
     pet: {
         "key": {
           "id": "5632499082330112",
@@ -500,6 +502,58 @@ const PetitionView = {
         ]);
     }
 };
+
+var SearchView = {
+    searchText: "",
+    searchType: "tag",
+  
+    submitForm: function () {
+        var search =  {
+            text: SearchView.searchText,
+            type: SearchView.searchType,
+        };
+        console.log(search);
+        /*return m.request({
+            method: "GET",
+            url: "",
+            params: "",
+        })
+        .then(function(result) {
+
+        })*/
+    },
+  
+    view: function () {
+      return m("form", {
+        onsubmit: function (e) {
+          e.preventDefault();
+          SearchView.submitForm();
+        },
+        class:"create-form"}, [
+
+            m("h1", "Rechercher une pétition"),
+            m("input[type=text]", {
+            value: SearchView.searchText,
+            oninput: function (e) { SearchView.searchText = e.target.value; },
+            required: true
+            }),
+
+            m("label",{for:"pet-select"}, "Recherchez par"),
+            m("select", {
+                name:"pets", 
+                id:"pet-select",
+                oninput: function (e) { 
+                    SearchView.searchType = e.target.value; 
+                },
+                required: true
+            }, [
+                m("option", {value: "tag"}, "Tag"),
+                m("option", {value: "nom"}, "Nom"),
+            ]),
+            m("button[type=submit]",{class: "create-button", style: "margin:20px;"} ,"Rechercher une pétition")
+      ]);
+    }
+  };
 
 var Petition = {
     view: function (vnode) {
@@ -601,10 +655,21 @@ var CreatePage = {
     }
 };
 
+var SearchInputPage = {
+    view: function() {
+        return m("body", [
+            m(Header),
+            m(SearchView),
+            m(Footer)
+        ])
+    }
+};
+
 m.route(document.body, "/home", {
     "/home": HomePage,
     "/petitions/:pageId": AllPetitionsPage,
     "/profile": ProfilePage,
     "/petition/:id": PetitionPage,
     "/create": CreatePage,
+    "/search": SearchInputPage,
 })
