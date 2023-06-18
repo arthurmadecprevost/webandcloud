@@ -263,39 +263,27 @@ public class PetitionEndpoint {
         return petitionEntity;
 	 }
 
-     @ApiMethod(name = "searchByName", httpMethod = HttpMethod.GET)
-    public List<Entity> searchByName(@Named("name") String name) {
-        Query query = new Query("Petition").setFilter(new Query.FilterPredicate("nom",
-        Query.FilterOperator.EQUAL, name));
+    @ApiMethod(name = "searchPetition", httpMethod = HttpMethod.GET)
+     public List<Entity> searchPetition(PostMessage pm) {
+        String type = pm.type;
+        String recherche = pm.searchText;
+        int page = Integer.parseInt(pm.page);
 
-        // Mise en place de projection pour optimiser la requete
+        int index = (page - 1) * 50;
+        List<Entity> result;
+        Query query;
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        query.addProjection(new PropertyProjection("nom", String.class));
-        query.addProjection(new PropertyProjection("description", String.class));
-        query.addProjection(new PropertyProjection("image", String.class));
-        query.addProjection(new PropertyProjection("nbVotants", Long.class));
-
-        PreparedQuery pq = datastore.prepare(query);
-        List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
+        if(type.equals("1")) {
+            query = new Query("Petition").setFilter(new Query.FilterPredicate("tags",
+            Query.FilterOperator.EQUAL, recherche));
+        } else {
+            query = new Query("Petition").setFilter(new Query.FilterPredicate("nom",
+            Query.FilterOperator.EQUAL, recherche));
+        }
         
-        return result;
-    }
-
-    @ApiMethod(name = "searchByTag", httpMethod = HttpMethod.GET)
-    public List<Entity> searchByTag(@Named("tagName") String tagName) {
-        Query query = new Query("Petition").setFilter(new Query.FilterPredicate("tags",
-        Query.FilterOperator.IN, tagName));
-
-        // Mise en place de projection pour optimiser la requete
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        query.addProjection(new PropertyProjection("nom", String.class));
-        query.addProjection(new PropertyProjection("description", String.class));
-        query.addProjection(new PropertyProjection("image", String.class));
-        query.addProjection(new PropertyProjection("nbVotants", Long.class));
-
         PreparedQuery pq = datastore.prepare(query);
-        List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
+        result = pq.asList(FetchOptions.Builder.withOffset(index).limit(50));
 
-        return result;
-    }
+        return result; 
+     }
 }
