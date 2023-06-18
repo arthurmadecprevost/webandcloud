@@ -12,13 +12,13 @@ Le projet PétiQuik (pour le retour de Groquik), est un projet réalisé sur Goo
 - Création de pétitions (nom, description, objectif de votes, image, tags)
 - Affichage du profil avec listes des pétitions signées et créées
 - Endpoint permettant l'ajout de données de démonstration (/petition)
+- Système de recherche de Pétitions par Tags et par nom (sensible à la casse).
 
 ### Les améliorations possibles
 
 - Correction du bouton Se connecter avec Google (il disparait de temps en temps, il faut rafraîchir la page).
 - Amélioration de la vue du Profil, avec ajout de pagination en cas de trop nombreuses pétitions signées/créées.
 - Connexion qui expire à chaque rafraîchissement de page (ajout d'un cookie? _miam_)
-- Ajout d'un système de recherche
 
 ## Installation
 Vous devez avoir un compte Google Cloud Platform (GCP), et avoir un projet disponible.
