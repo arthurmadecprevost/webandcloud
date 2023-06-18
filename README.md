@@ -30,7 +30,7 @@ Dans ce projet, lancez Google App Engine et clonez ce répertoire Git.
 
 - Configurez les index en utilisant la commande suivante, dans le répertoire racine :
 ```bash
-gcloud datastore indexes create /main/webapp/WEB-INF/index.yaml
+gcloud datastore indexes create src/main/webapp/WEB-INF/index.yaml
 ```
 
 - Compilez le code avec la commande suivante :
