@@ -24,9 +24,9 @@ Le projet PétiQuik (pour le retour de Groquik), est un projet réalisé sur Goo
 Vous devez avoir un compte Google Cloud Platform (GCP), et avoir un projet disponible.
 Dans ce projet, lancez Google App Engine et clonez ce répertoire Git.
 
-- Pensez à modifier vos audiences/clients id dans le fichier Java "PetitionEndpoint.java".
+- Pensez à modifier vos audiences/clients id dans le fichier Java "PetitionEndpoint.java" (Ligne 34 et 35).
 
-- Pensez à modifier votre data-client_id dans le fichier app.js.
+- Pensez à modifier votre data-client_id dans le fichier app.js (Ligne 67).
 
 - Configurez les index en utilisant la commande suivante, dans le répertoire racine :
 ```bash
