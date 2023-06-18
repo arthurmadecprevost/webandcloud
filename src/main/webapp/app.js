@@ -282,13 +282,13 @@ var searchPetition = {
         m.redraw();
         var data = {
             'type': type,
-            'text': text,
-            'id': id,
+            'searchText': text,
+            'page': id,
         };
         if (id > 0) {
             return m.request({
                 method: "GET",
-                url: "_ah/api/petiQuik/v1/getPetitions",
+                url: "_ah/api/petiQuik/v1/searchPetition",
                 params: data,
             }).then(function (result) {
                 searchPetition.list = result.items;
