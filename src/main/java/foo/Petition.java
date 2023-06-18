@@ -12,6 +12,6 @@ public class Petition {
     public int nbVotants;
     public String createurId;
     public Date dateCreation;
-    public List<String> tags;
-    public List<String> votants;  
+    public String tags;
+    public List<String> votants;
 }

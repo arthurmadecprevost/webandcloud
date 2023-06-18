@@ -10,6 +10,8 @@ indexes:
       direction: desc
 - kind: Petition
   properties:
-    - name: nbvotants
-      direction: desc
-    - name: Owner
+  - name: nbVotants
+    direction: desc
+  - name: description
+  - name: image
+  - name: nom

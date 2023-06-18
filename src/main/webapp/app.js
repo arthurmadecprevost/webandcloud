@@ -3,7 +3,7 @@ var Login = {
     email: "",
     ID: "",
     picture: "",
-    joinDate: "",
+    creationDate: "",
     handleCredential: function (response) {
         console.log("Login.handleCredential() callback called:" + response.credential)
         // decodeJwtResponse() is a custom function defined by you
@@ -20,35 +20,39 @@ var Login = {
         //DiceGame.name = responsePayload.name
         Login.name = responsePayload.name
         Login.email = responsePayload.email
-        Login.ID = response.credential
+        Login.ID = responsePayload.sub
+        Login.credential = response.credential
+        //Login.ID = response.credential
         Login.picture = responsePayload.picture
+        fullName = Login.name;
+
+        var data = {'body': fullName};
+        
+        m.request({
+            method: "GET",
+            url: "_ah/api/petiQuik/v1/checkCreatedUser?access_token="+Login.credential,
+            params: data
+        }).then(function (result) {
+            console.log(result);
+            Login.creationDate = result.properties.creationDate;
+            m.redraw()
+        })
         // external event
-        m.redraw()
     }
 }
 
 var Header = {
+    
     view: function () {
-        if (Login.name) {
+
+        if (Login.ID) {
             return m("header", [
                 m(".logo", "PétiQuik"),
                 m("nav", [
                     m("ul", [
                         m("li", m("a", { href: "index_petiquik.html#!/home" }, "Accueil")),
-                        m("li", m("a", { href: "index_petiquik.html#!/petitions" }, "Pétitions")),
-                        m("li", m("a", { href: "#" }, "Actions")),
-                        m("li", m("a", { href: "#" }, "Blog")),
-                        m("li", m("a", { href: "#" }, "Nous Contacter")),
-                    ]),
-                ]),
-                m(".search-bar", [
-                    m("form", { action: "#", method: "get" }, [
-                        m("input", {
-                            type: "text",
-                            name: "search",
-                            placeholder: "Recherchez des pétitions...",
-                        }),
-                        m("button", { type: "submit" }, "Rechercher"),
+                        m("li", m("a", { href: "index_petiquik.html#!/petitions/1" }, "Pétitions")),
+                        m("li", m("a", { href: "index_petiquik.html#!/create" }, "Nouvelle pétition"))
                     ]),
                 ]),
                 m("a", { class: "header-profile", href: "index_petiquik.html#!/profile" }, [
@@ -62,20 +66,7 @@ var Header = {
                 m("nav", [
                     m("ul", [
                         m("li", m("a", { href: "index_petiquik.html#!/home" }, "Accueil")),
-                        m("li", m("a", { href: "index_petiquik.html#!/petitions" }, "Pétitions")),
-                        m("li", m("a", { href: "index_petiquik.html#!/create" }, "Nouvelle pétition")),
-                        m("li", m("a", { href: "#" }, "Blog")),
-                        m("li", m("a", { href: "#" }, "Nous Contacter")),
-                    ]),
-                ]),
-                m(".search-bar", [
-                    m("form", { action: "#", method: "get" }, [
-                        m("input", {
-                            type: "text",
-                            name: "search",
-                            placeholder: "Recherchez des pétitions...",
-                        }),
-                        m("button", { type: "submit" }, "Rechercher"),
+                        m("li", m("a", { href: "index_petiquik.html#!/petitions/1" }, "Pétitions"))
                     ]),
                 ]),
                 m("div", {
@@ -109,7 +100,7 @@ var HeroSection = {
                     "p",
                     "Nous sommes une communauté mondiale de personnes qui se rassemblent pour changer le monde. Nous avons le pouvoir de faire une différence, un vote à la fois. Rejoignez-nous et devenez le changement que vous voulez voir dans le monde."
                 ),
-                m("a", { class: "button-big", href: "index_petiquik.html#!/petitions" }, "Voir toutes les pétitions"),
+                m("a", { class: "button-big", href: "index_petiquik.html#!/petitions/1" }, "Voir toutes les pétitions"),
             ]),
             m(".hero-image", [
                 m("img", {
@@ -128,11 +119,28 @@ var allPetitions = {
             url: "_ah/api/petiQuik/v1/top100/"
         }).then(function (result) {
             allPetitions.list = result.items;
-            console.log("got:", result.items);
+            console.log("allPetitions.list got:", result.items);
             // m.redraw();
         })
     },
 };
+
+var petitionPage = {
+    list: [],
+    loadList: function(pageId) {
+        list = [];
+        m.redraw();
+        if (pageId > 0) {
+            return m.request({
+                method: "GET",
+                url: "_ah/api/petiQuik/v1/getPetitions/"+pageId
+            }).then(function (result) {
+                petitionPage.list = result.items;
+                console.log("petitionPage.list (page "+pageId+") got:", result.items);
+            })
+        }
+    }
+}
 
 var popularPetitions = {
     list: [],
@@ -143,6 +151,34 @@ var popularPetitions = {
         }).then(function (result) {
             popularPetitions.list = result.items;
             console.log("got:", result.items);
+            // m.redraw();
+        })
+    },
+}
+
+var myPetitions = {
+    list: [],
+    loadList: function () {
+        return m.request({
+            method: "GET",
+            url: "_ah/api/petiQuik/v1/mesPetitions"+'?access_token='+encodeURIComponent(Login.credential)
+        }).then(function (result) {
+            myPetitions.list = result.items;
+            console.log("myPetitions.list:", result.items);
+            // m.redraw();
+        })
+    },
+}
+
+var signedPetitions = {
+    list: [],
+    loadList: function () {
+        return m.request({
+            method: "GET",
+            url: "_ah/api/petiQuik/v1/mesSignatures"+'?access_token='+encodeURIComponent(Login.credential),
+        }).then(function (result) {
+            signedPetitions.list = result.items;
+            console.log("signedPetitions.list:", result.items);
             // m.redraw();
         })
     },
@@ -174,65 +210,91 @@ var AllPetitionsView = {
     },
 };
 
-var user = {
-    firstName: "John",
-    lastName: "Doe",
-    profilePic: "https://picsum.photos/200",
-    joinDate: "2022-01-01",
-    petitionsSigned: [
-        {
-            title: "Stopper la pollution plastique",
-            description: "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
-            signatures: 25000,
-            image: "https://example.com/images/petition1.jpg"
-        },
-        {
-            title: "Pour une éducation inclusive",
-            description: "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
-            signatures: 18000,
-            image: "https://example.com/images/petition2.jpg"
-        },
-        {
-            title: "Sauvons les abeilles",
-            description: "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
-            signatures: 35000,
-            image: "https://example.com/images/petition3.jpg"
+var PaginatedPetitionView = {
+    onupdate: function(vnode) {
+        if (vnode.attrs.pageId !== vnode.state.previousPageId) {
+            vnode.state.previousPageId = vnode.attrs.pageId;
+            location.reload();
         }
-    ]
+    },
+
+    oninit: function(vnode) {
+        vnode.state.previousPageId = vnode.attrs.pageId;
+        petitionPage.loadList(vnode.attrs.pageId);
+    },
+
+    view: function(vnode) {
+        console.log("vnode=" + vnode);
+        console.log("pageId=" + vnode.attrs.pageId);
+        if (petitionPage.list.length > 0) { 
+            var pagination = [
+                m("a", {
+                    class: "button-small",
+                    href: "index_petiquik.html#!/petitions/" + (parseInt(vnode.attrs.pageId, 10) - 1)
+                }, "Page précédente"),
+                m("p", {
+                    "style": "margin:20px"
+                }, "Page " + vnode.attrs.pageId),
+                m("a", {
+                    class: "button-small",
+                    href: "index_petiquik.html#!/petitions/" + (parseInt(vnode.attrs.pageId, 10) + 1)
+                }, "Page suivante"),
+            ];
+
+            if (vnode.attrs.pageId == 1 && petitionPage.list.length < 50) {
+                pagination = [  
+                    m("p", {
+                        "style": "margin:20px"
+                    }, "Page " + vnode.attrs.pageId),
+                ];
+            }
+
+            if (vnode.attrs.pageId > 1 && petitionPage.list.length < 50) {
+                pagination = [
+                    m("a", {
+                        class: "button-small",
+                        href: "index_petiquik.html#!/petitions/" + (parseInt(vnode.attrs.pageId, 10) - 1)
+                    }, "Page précédente"),
+                    m("p", {
+                        "style": "margin:20px"
+                    }, "Page " + vnode.attrs.pageId)
+                ];
+            }
+
+            if (vnode.attrs.pageId == 1 && petitionPage.list.length == 50) {
+                pagination = [
+                    m("p", {
+                        "style": "margin:20px"
+                    }, "Page " + vnode.attrs.pageId),
+                    m("a", {
+                        class: "button-small",
+                        href: "index_petiquik.html#!/petitions/" + (parseInt(vnode.attrs.pageId, 10) + 1)
+                    }, "Page suivante"),
+                ];
+            }
+
+            return m(".petitions", [
+                m("h2", "Nos pétitions (page " + vnode.attrs.pageId + ")"),
+                m("ul", petitionPage.list.map(function(petition) {
+                    return m(Petition, petition);
+                })),
+                m(".pagination", pagination),
+            ]);
+        } else {
+            return m(".petitions", [
+                m("h1", "Erreur quatre cent quatre"),
+                m("p", "Cette page n'existe pas, vous êtes perdu ? Suivez le guide :"),
+                m("a", {href: "https://fr.wikipedia.org/wiki/Le_Guide_du_voyageur_galactique"},"Le Guide du voyageur galactique"),
+            ]); 
+        }
+    },
 };
 
-var petitions = [
-    {
-        title: "Stopper la pollution plastique",
-        description: "Nous demandons aux gouvernements du monde entier de prendre des mesures pour réduire la pollution plastique qui menace la faune et la flore marine.",
-        signatures: 25000,
-        image: "https://example.com/images/petition1.jpg"
-    },
-    {
-        title: "Pour une éducation inclusive",
-        description: "Nous demandons aux écoles et universités du monde entier de mettre en place des politiques d'inclusion pour les étudiants avec des besoins spécifiques.",
-        signatures: 18000,
-        image: "https://example.com/images/petition2.jpg"
-    },
-    {
-        title: "Sauvons les abeilles",
-        description: "Nous demandons aux gouvernements et aux entreprises de prendre des mesures pour protéger les abeilles, qui sont essentielles pour la pollinisation de nombreux aliments.",
-        signatures: 35000,
-        image: "https://example.com/images/petition3.jpg"
-    },
-    {
-        title: "Pour un internet libre",
-        description: "Nous demandons aux gouvernements et aux entreprises de protéger la neutralité du net pour garantir un accès libre et égalitaire à l'information pour tous.",
-        signatures: 12000,
-        image: "https://example.com/images/petition4.jpg"
-    }
-];
 
 
 const ProfileView = {
     view: function (vnode) {
         const user = vnode.attrs.user;
-        const petitions = vnode.attrs.petitions;
 
         return m('.div', [
             m('.profile-card', [
@@ -241,16 +303,8 @@ const ProfileView = {
                 ]),
                 m('.profile-info', [
                     m('h2.profile-name', user.name),
-                    m('p.profile-date', 'Membre depuis ' + user.joinDate),
+                    m('p.profile-date', 'Membre depuis le ' + user.creationDate),
                 ]),
-            ]),
-            m('div', [
-                 m('h3.profile-petitions-header', 'Pétitions signées'),
-                m('ul.profile-petitions-list', petitions.map(function (petition) {
-                    return m('li', [
-                        m('a', { href: petition.url }, petition.title)
-                    ])
-                }))
             ])
         ]);
     }
@@ -261,13 +315,26 @@ var CreateView = {
     description: "",
     objective: 1,
     picture: "",
-    tags: [],
+    tags: "",
   
     submitForm: function () {
-      // Ici, vous pouvez implémenter la logique pour soumettre le formulaire
-      // par exemple, envoyer les données de la pétition au serveur
-  
-      console.log("Données du formulaire :", this.name, this.description, this.picture, this.objective, this.tags);
+        var pet = {
+            nom: CreateView.name,
+            description: CreateView.description,
+            image: CreateView.picture,
+            tags: CreateView.tags,
+            objectif: CreateView.objective,
+        };
+        console.log("Données du formulaire :", pet);
+        return m.request({
+            method: "POST",
+            url: "_ah/api/petiQuik/v1/addPetition"+'?access_token='+Login.credential,
+            params: pet,
+        })
+        .then(function(result) {
+            console.log("created:",result)
+            m.route.set("/petition/:id", {id: result.key.id})
+        })
     },
   
     view: function () {
@@ -312,8 +379,8 @@ var CreateView = {
     
             m("label", "Tags (séparés par des virgules)"),
             m("input[type=text]", {
-            value: CreateView.tags.join(","),
-            oninput: function (e) { CreateView.tags = e.target.value.split(","); },
+            value: CreateView.tags,
+            oninput: function (e) { CreateView.tags = e.target.value; },
             required: true,
             }),
             
@@ -322,61 +389,133 @@ var CreateView = {
     }
   };
 
+  var MyPetitionsView = {
+    oninit: function(vnode) {
+        myPetitions.loadList(vnode.attrs.myPetsId);
+    },
+    view: function() {
+        return m('div', [
+            m('h3.profile-petitions-header', 'Mes pétitions'),
+            m('ul.profile-petitions-list', myPetitions.list.map(function (petition) {
+                return m('li', [
+                    m('a', { href: "index_petiquik.html#!/petition/"+petition.key.id }, petition.properties.nom)
+                ])
+           }))
+       ]);
+    }
+  }
+
+  var SignedPetitionsView = {
+    oninit: function(vnode) {
+        signedPetitions.loadList(vnode.attrs.signedPetsId);
+    },
+    view: function() {
+        var petitions = signedPetitions.list;
+
+        return m('div', [
+            m('h3.profile-petitions-header', 'Pétitions signées'),
+            m('ul.profile-petitions-list', petitions.map(function (petition) {
+                return m('li', [
+                    m('a', { href: "index_petiquik.html#!/petition/"+petition.key.id }, petition.properties.nom)
+                ])           
+            }))
+       ]);
+    }
+  }
+
 const PetitionView = {
+    pet: {
+        "key": {
+          "id": "5632499082330112",
+        },
+        "properties": {
+          "image": "",
+          "dateCreation": "",
+          "objectif": "",
+          "description": "",
+          "datetri": "",
+          "nom": "",
+          "nbVotants": "",
+          "createurId": "",
+          "tags": [],
+          "nomCreateur":"",
+        }
+    },
+
     oninit: function (vnode) {
+        if (vnode.attrs.id != PetitionView.pet.key.id) {
+            pet = {
+                "key": {
+                  "id": "",
+                },
+                "properties": {
+                  "image": "",
+                  "dateCreation": "",
+                  "objectif": "",
+                  "description": "",
+                  "datetri": "",
+                  "nom": "",
+                  "nbVotants": "",
+                  "createurId": "",
+                  "tags": [],
+                  "nomCreateur":"",
+                }
+            };            
+        };
         return m.request({
             method: "GET",
             url: "_ah/api/petiQuik/v1/getPetition/"+vnode.attrs.id,
         }).then(function (result) {
-            console.log("got:", pet);
-            // m.redraw();
+            PetitionView.pet = result; // Affecte le résultat à la propriété 'pet'
+            console.log("got:", PetitionView.pet);
+            m.redraw();
         })
     },
-    view: function (vnode) {
-        pet = {
-            "key": {
-              "kind": "Petition",
-              "appId": "e~tp-dev-cloud",
-              "id": "0",
-              "name": vnode.attrs.id,
-              "namespace": "",
-              "complete": true
-            },
-            "appId": "e~tp-dev-cloud",
-            "namespace": "",
-            "kind": "Petition",
-            "properties": {
-              "owner": "U373",
-              "date": "2023-05-29T21:35:31.953Z",
-              "image": "https://picsum.photos/400/300",
-              "nbvotants": "190",
-              "name": "Pour le retour de Groquik",
-              "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin fermentum venenatis molestie. Nullam elementum augue purus, eu blandit leo varius non. Nunc rhoncus purus nibh, sit amet mattis nisl ornare fermentum.", 
-              "votants": [
-                "U958",
-                "U319"
-              ],
-              "tags": [
-                "T85",
-                "T40"
-              ]
-            }
-          };
+
+    sign: function () {
+        if (PetitionView.pet.key.id != "") {
+            var pet = {
+                id: PetitionView.pet.key.id,
+                nom: PetitionView.pet.properties.nom,
+                description: PetitionView.pet.properties.description,
+                image: PetitionView.pet.properties.image,
+                tags: PetitionView.pet.properties.tags,
+                objectif: PetitionView.pet.properties.objectif
+            };
+
+            var oldCounter;
+
+            console.log("Données signature :", PetitionView.pet.key.id);
+            return m.request({
+                method: "PUT",
+                url: "_ah/api/petiQuik/v1/signPetition/"+Login.ID+"/"+PetitionView.pet.key.id,
+            })
+            .then(function(result) {
+                PetitionView.pet.properties.nbVotants = result.properties.nbVotants;
+                console.log("signed:",result)
+            })
+        }       
+    },
+
+    view: function () {
+        var pet = PetitionView.pet; // Utilise la propriété 'pet' définie dans l'objet PetitionView
+
           return m(".petition-page", [
-                m("h1", {class: "title"}, pet.properties.name),
+                m("h1", {class: "title"}, pet.properties.nom),
                 m("div", {class: "content"}, [
                     m("div", {class:"left"}, [
-                        m("img", { src: pet.properties.image, alt: pet.properties.name, width: "100%"}),
+                        m("img", { src: pet.properties.image, alt: pet.properties.nom, width: "100%"}),
                         m("p", pet.properties.description),
                     ]),
                     m("div", {class: "right"}, [
-                        m("div", {style:"padding-bottom:20px;"},"Il y a actuellement "+pet.properties.nbvotants + " signataires, objectif "+ (pet.properties.nbvotants*1.2)+" !"),
-                        m(".sign", [
-                            m("a", { class: "button-small", href: "index_petiquik.html#!/petitions", style:"width:100%; text-align:center; font-weight:bold;" }, "Signer la pétition"),
-                        ]),
+                        m("div", {style:"padding-bottom:20px;"},"Il y a actuellement "+pet.properties.nbVotants + " signataires, objectif "+ pet.properties.objectif+" !"),
+                        Login.credential ? m(".sign", [
+                            m("a", { class: "button-small", onclick: PetitionView.sign, style: "width:100%; text-align:center; font-weight:bold;" }, "Signer la pétition"),
+                        ]) : m("p", "Connectez-vous pour signer la pétition."),
+                        m("p", {style: "text-align: center;margin: 40px;"}, "Publié par: "+pet.properties.nomCreateur),
                         m(".tags", {style: "margin-top:10px"}, [
                             m("h3", "Tags"),
-                            m("li",pet.properties.tags.join(", "))
+                            m("li", {style: "max-width: 350px;"},pet.properties.tags.join(", "))
                         ]),
                     ])
                 ]),
@@ -386,18 +525,22 @@ const PetitionView = {
 
 var Petition = {
     view: function (vnode) {
+        if (vnode.attrs.properties.description.length > 200) {
+            desc = vnode.attrs.properties.description.substr(0, 200)+"...";
+        } else {
+            desc = vnode.attrs.properties.description
+        }
         return m("li", [
             m(".petition-image", [
-                m("img", { src: vnode.attrs.properties.image, alt: vnode.attrs.properties.name }),
+                m("img", { src: vnode.attrs.properties.image, alt: vnode.attrs.properties.nom }),
             ]),
             m(".petition-content", [
-                m("h3", vnode.attrs.properties.name),
-                m("p", vnode.attrs.properties.description),
-                m("a", {href: "index_petiquik.html#!/petition/"+vnode.attrs.key.name }, "LIEN"+vnode.attrs.key.name),
-                m("div.signature-count", vnode.attrs.properties.nbvotants + " signataires"),
+                m("h3", vnode.attrs.properties.nom),
+                m("p", desc),
+                m("div.signature-count", vnode.attrs.properties.nbVotants + " signataires"),
             ]),
             m(".sign", [
-                m("a", { class: "button-small", href: "index_petiquik.html#!/petitions" }, "Signer"),
+                m("a", { class: "button-small", href: "index_petiquik.html#!/petition/"+vnode.attrs.key.id }, "Signer"),
             ])
         ]);
     },
@@ -425,10 +568,12 @@ var HomePage = {
 };
 
 var AllPetitionsPage = {
-    view: function () {
+    view: function (vnode) {
+        var pageId = vnode.attrs.pageId;
+        
         return m("body", [
             m(Header),
-            m(AllPetitionsView),
+            m(PaginatedPetitionView, {pageId : pageId}),
             m(Footer),
         ]);
     },
@@ -436,11 +581,19 @@ var AllPetitionsPage = {
 
 var ProfilePage = {
     view: function () {
-        return m("body", [
-            m(Header),
-            m(ProfileView, { user: Login, petitions: popularPetitions.list }),
-            m(Footer)
-        ]);
+        if (Login.ID) {
+            return m("body", [
+                m(Header),
+                m(ProfileView, { user: Login, petitions: popularPetitions.list }),
+                m(".petitions", [
+                    m(MyPetitionsView),
+                    m(SignedPetitionsView),
+                ]),
+                m(Footer)
+            ]);
+        } else {
+            m.route.set("/home");
+        }
     },
 };
 
@@ -458,17 +611,21 @@ var PetitionPage = {
 
 var CreatePage = {
     view: function () {
-        return m("body", [
-            m(Header),
-            m(CreateView),
-            m(Footer)
-        ]);
+        if (Login.ID) {
+            return m("body", [
+                m(Header),
+                m(CreateView),
+                m(Footer)
+            ]);
+        } else {
+            m.route.set("/home");
+        }
     }
 };
 
 m.route(document.body, "/home", {
     "/home": HomePage,
-    "/petitions": AllPetitionsPage,
+    "/petitions/:pageId": AllPetitionsPage,
     "/profile": ProfilePage,
     "/petition/:id": PetitionPage,
     "/create": CreatePage,

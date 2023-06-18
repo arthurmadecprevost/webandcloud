@@ -9,8 +9,12 @@
     <include path="/**.html" >
     </include>
     <include path="/**.js" >
-    </include>    
+    </include>
     <include path="/**.css" >
+    </include>    
+    <include path="/**.ico" >
+    </include>
+    <include path="/**.png" >
     </include>
     
   </static-files>
