@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 public class Petition {
-    public int id;
+    public String id;
     public String nom;
     public String description;
     public int objectif;

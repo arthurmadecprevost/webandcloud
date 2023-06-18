@@ -93,7 +93,6 @@ public class PetitionEndpoint {
 		return result;
 	}
 	
-	/**
 	 * @param user User
 	 * @return Une liste de pétitions
 	 * @throws UnauthorizedException
@@ -107,7 +106,12 @@ public class PetitionEndpoint {
 		Query q = new Query("Petition").setFilter(new Query.FilterPredicate("createurId",
                 Query.FilterOperator.EQUAL, user.getId()));
 		
+		// Mise en place de projection pour optimiser la requete
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        query.addProjection(new PropertyProjection("nom", String.class));
+        query.addProjection(new PropertyProjection("description", String.class));
+        query.addProjection(new PropertyProjection("image", String.class));
+        query.addProjection(new PropertyProjection("nbVotants", Long.class));
 		PreparedQuery pq = datastore.prepare(q);
 		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(50));
 		return result;
@@ -178,6 +182,7 @@ public class PetitionEndpoint {
         return petition;
     }
 
+
     @ApiMethod(name = "addPetition", httpMethod = HttpMethod.POST)
 	public Entity addPetition(User user, Petition petition) throws Exception{ 
 		if (user == null) {
@@ -207,6 +212,7 @@ public class PetitionEndpoint {
 	}
 
     @ApiMethod(name = "signPetition", path = "signPetition/{userID}/{petitionId}", httpMethod = HttpMethod.PUT) 
+
 	public Entity signPetition(@Named("userID") String user, @Named("petitionId") String petId) throws Exception{
 		if (user == null) {
 			throw new UnauthorizedException("Invalid credentials");
