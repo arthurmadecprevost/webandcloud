@@ -44,7 +44,7 @@ var Header = {
                         m("li", m("a", { href: "index_petiquik.html#!/home" }, "Accueil")),
                         m("li", m("a", { href: "index_petiquik.html#!/petitions/1" }, "Pétitions")),
                         m("li", m("a", { href: "index_petiquik.html#!/create" }, "Nouvelle pétition")),
-                        m("li", m("a", { href: "index_petiquik.html#!/search" }, "Rechercher une pétition")),
+                        m("li", m("a", { href: "index_petiquik.html#!/searchInput" }, "Rechercher une pétition")),
                     ]),
                 ]),
                 m("a", { class: "header-profile", href: "index_petiquik.html#!/profile" }, [
@@ -59,7 +59,7 @@ var Header = {
                     m("ul", [
                         m("li", m("a", { href: "index_petiquik.html#!/home" }, "Accueil")),
                         m("li", m("a", { href: "index_petiquik.html#!/petitions/1" }, "Pétitions")),
-                        m("li", m("a", { href: "index_petiquik.html#!/search" }, "Rechercher une pétition")),
+                        m("li", m("a", { href: "index_petiquik.html#!/searchInput" }, "Rechercher une pétition")),
                     ]),
                 ]),
                 m("div", {
@@ -275,7 +275,109 @@ var PaginatedPetitionView = {
     },
 };
 
+var searchPetition = {
+    list: [],
+    loadList: function(type, text, id) {
+        list = [];
+        m.redraw();
+        var data = {
+            'type': type,
+            'text': text,
+            'id': id,
+        };
+        if (id > 0) {
+            return m.request({
+                method: "GET",
+                url: "_ah/api/petiQuik/v1/getPetitions",
+                params: data,
+            }).then(function (result) {
+                searchPetition.list = result.items;
+            })
+        }
+    }
+}
 
+var SearchResult = {
+    onupdate: function(vnode) {
+        if (vnode.attrs.id !== vnode.state.previousSearchId) {
+            vnode.state.previousSearchId = vnode.attrs.id;
+            location.reload();
+        }
+    },
+
+    oninit: function(vnode) {
+        vnode.state.previousSearchId = vnode.attrs.id;
+        searchPetition.loadList(vnode.attrs.type,vnode.attrs.text,vnode.attrs.id);
+    },
+
+    view: function(vnode) {
+        var type = vnode.attrs.type;
+        var text = vnode.attrs.text;
+        var id = vnode.attrs.id;
+
+        if (searchPetition.list.length > 0) { 
+            var pagination = [
+                m("a", {
+                    class: "button-small",
+                    href: "index_petiquik.html#!/search/" + type + "/" + text + "/" + (parseInt(id, 10) - 1)
+                }, "Page précédente"),
+                m("p", {
+                    "style": "margin:20px"
+                }, "Page " + id),
+                m("a", {
+                    class: "button-small",
+                    href: "index_petiquik.html#!/search/" + type + "/" + text + "/" + (parseInt(id, 10) + 1)
+                }, "Page suivante"),
+            ];
+
+            if (id == 1 && searchPetition.list.length < 50) {
+                pagination = [  
+                    m("p", {
+                        "style": "margin:20px"
+                    }, "Page " + id),
+                ];
+            }
+
+            if (id > 1 && searchPetition.list.length < 50) {
+                pagination = [
+                    m("a", {
+                        class: "button-small",
+                        href: "index_petiquik.html#!/search/" + type + "/" + text + "/" + (parseInt(id, 10) - 1)
+                    }, "Page précédente"),
+                    m("p", {
+                        "style": "margin:20px"
+                    }, "Page " + id)
+                ];
+            }
+
+            if (id == 1 && searchPetition.list.length == 50) {
+                pagination = [
+                    m("p", {
+                        "style": "margin:20px"
+                    }, "Page " + id),
+                    m("a", {
+                        class: "button-small",
+                        href: "index_petiquik.html#!/search/" + type + "/" + text + "/" + (parseInt(id, 10) + 1)
+                    }, "Page suivante"),
+                ];
+            }
+
+            return m(".petitions", [
+                m("h2", "Votre recherche (page " + id + ")"),
+                m("ul", searchPetition.list.map(function(petition) {
+                    return m(Petition, petition);
+                })),
+                m(".pagination", pagination),
+            ]);
+        } else {
+            return m(".petitions", [
+                m("h1", "Erreur quatre cent quatre"),
+                m("p", "Cette page n'existe pas, vous êtes perdu ? Suivez le guide :"),
+                m("a", {href: "https://fr.wikipedia.org/wiki/Le_Guide_du_voyageur_galactique"},"Le Guide du voyageur galactique"),
+            ]); 
+        }
+    }
+}
 
 const ProfileView = {
     view: function (vnode) {
@@ -505,7 +607,7 @@ var PetitionView = {
 
 var SearchView = {
     searchText: "",
-    searchType: "tag",
+    searchType: "1",
   
     submitForm: function () {
         var search =  {
@@ -547,8 +649,8 @@ var SearchView = {
                 },
                 required: true
             }, [
-                m("option", {value: "tag"}, "Tag"),
-                m("option", {value: "nom"}, "Nom"),
+                m("option", {value: "1"}, "Tag"),
+                m("option", {value: "2"}, "Nom"),
             ]),
             m("button[type=submit]",{class: "create-button", style: "margin:20px;"} ,"Rechercher une pétition")
       ]);
@@ -665,11 +767,30 @@ var SearchInputPage = {
     }
 };
 
+var SearchResultPage = {
+    view: function(vnode) {
+        var typeSearch = vnode.attrs.type; // Récupère l'ID de la pétition depuis les attributs du vnode
+        var textSearch = vnode.attrs.text; // Récupère l'ID de la pétition depuis les attributs du vnode
+        var idPagination = vnode.attrs.id; // Récupère l'ID de la pétition depuis les attributs du vnode
+
+        return m("body", [
+            m(Header),
+            m(SearchResult, {
+                type: typeSearch,
+                text: textSearch,
+                id: idPagination
+            }),
+            m(Footer),
+        ])
+    }
+}
+
 m.route(document.body, "/home", {
     "/home": HomePage,
     "/petitions/:pageId": AllPetitionsPage,
     "/profile": ProfilePage,
     "/petition/:id": PetitionPage,
     "/create": CreatePage,
-    "/search": SearchInputPage,
+    "/searchInput": SearchInputPage,
+    "/search/:type/:text/:id": SearchResultPage,
 })
