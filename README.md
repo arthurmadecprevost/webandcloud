@@ -1,6 +1,8 @@
 
 # Projet TinyPet (PétiQuik)
 
+Auteurs : Halim El Ouatani, Arnaud Lartigue et Arthur Madec-Prévost
+
 Le projet PétiQuik (pour le retour de Groquik), est un projet réalisé sur Google App Engine. Il est constitué d'un Backend en Java et d'un front en Mithril.js.
 
 ### Liste des fonctionnalités
