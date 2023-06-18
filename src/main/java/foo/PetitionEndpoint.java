@@ -263,7 +263,7 @@ public class PetitionEndpoint {
         return petitionEntity;
 	 }
 
-     @ApiMethod(name = "searchPetition", httpMethod = HttpMethod.GET)
+    @ApiMethod(name = "searchPetition", httpMethod = HttpMethod.GET)
      public List<Entity> searchPetition(PostMessage pm) {
         String type = pm.type;
         String recherche = pm.searchText;
