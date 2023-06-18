@@ -5,17 +5,9 @@ var Login = {
     picture: "",
     creationDate: "",
     handleCredential: function (response) {
-        console.log("Login.handleCredential() callback called:" + response.credential)
         // decodeJwtResponse() is a custom function defined by you
         // to decode the credential response.
         const responsePayload = jwt_decode(response.credential);
-
-        console.log("ID: " + responsePayload.sub);
-        console.log('Full Name: ' + responsePayload.name);
-        console.log('Given Name: ' + responsePayload.given_name);
-        console.log('Family Name: ' + responsePayload.family_name);
-        console.log("Image URL: " + responsePayload.picture);
-        console.log("Email: " + responsePayload.email);
 
         //DiceGame.name = responsePayload.name
         Login.name = responsePayload.name
@@ -33,7 +25,6 @@ var Login = {
             url: "_ah/api/petiQuik/v1/checkCreatedUser?access_token="+Login.credential,
             params: data
         }).then(function (result) {
-            console.log(result);
             Login.creationDate = result.properties.creationDate;
             m.redraw()
         })
@@ -84,7 +75,6 @@ var Header = {
 };
 
 function handleCredentialResponse(response) {
-    console.log("handleCredentialResponse() callback called:" + response.credential)
     Login.handleCredential(response)
 }
 
@@ -119,7 +109,6 @@ var allPetitions = {
             url: "_ah/api/petiQuik/v1/top100/"
         }).then(function (result) {
             allPetitions.list = result.items;
-            console.log("allPetitions.list got:", result.items);
             // m.redraw();
         })
     },
@@ -136,7 +125,6 @@ var petitionPage = {
                 url: "_ah/api/petiQuik/v1/getPetitions/"+pageId
             }).then(function (result) {
                 petitionPage.list = result.items;
-                console.log("petitionPage.list (page "+pageId+") got:", result.items);
             })
         }
     }
@@ -150,7 +138,6 @@ var popularPetitions = {
             url: "_ah/api/petiQuik/v1/top4/"
         }).then(function (result) {
             popularPetitions.list = result.items;
-            console.log("got:", result.items);
             // m.redraw();
         })
     },
@@ -164,7 +151,6 @@ var myPetitions = {
             url: "_ah/api/petiQuik/v1/mesPetitions"+'?access_token='+encodeURIComponent(Login.credential)
         }).then(function (result) {
             myPetitions.list = result.items;
-            console.log("myPetitions.list:", result.items);
             // m.redraw();
         })
     },
@@ -178,7 +164,6 @@ var signedPetitions = {
             url: "_ah/api/petiQuik/v1/mesSignatures"+'?access_token='+encodeURIComponent(Login.credential),
         }).then(function (result) {
             signedPetitions.list = result.items;
-            console.log("signedPetitions.list:", result.items);
             // m.redraw();
         })
     },
@@ -224,8 +209,6 @@ var PaginatedPetitionView = {
     },
 
     view: function(vnode) {
-        console.log("vnode=" + vnode);
-        console.log("pageId=" + vnode.attrs.pageId);
         if (petitionPage.list.length > 0) { 
             var pagination = [
                 m("a", {
@@ -325,14 +308,12 @@ var CreateView = {
             tags: CreateView.tags,
             objectif: CreateView.objective,
         };
-        console.log("Données du formulaire :", pet);
         return m.request({
             method: "POST",
             url: "_ah/api/petiQuik/v1/addPetition"+'?access_token='+Login.credential,
             params: pet,
         })
         .then(function(result) {
-            console.log("created:",result)
             m.route.set("/petition/:id", {id: result.key.id})
         })
     },
@@ -467,7 +448,6 @@ const PetitionView = {
             url: "_ah/api/petiQuik/v1/getPetition/"+vnode.attrs.id,
         }).then(function (result) {
             PetitionView.pet = result; // Affecte le résultat à la propriété 'pet'
-            console.log("got:", PetitionView.pet);
             m.redraw();
         })
     },
@@ -485,14 +465,12 @@ const PetitionView = {
 
             var oldCounter;
 
-            console.log("Données signature :", PetitionView.pet.key.id);
             return m.request({
                 method: "PUT",
                 url: "_ah/api/petiQuik/v1/signPetition/"+Login.ID+"/"+PetitionView.pet.key.id,
             })
             .then(function(result) {
                 PetitionView.pet.properties.nbVotants = result.properties.nbVotants;
-                console.log("signed:",result)
             })
         }       
     },
