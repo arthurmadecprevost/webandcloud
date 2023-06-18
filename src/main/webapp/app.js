@@ -371,9 +371,10 @@ var SearchResult = {
             ]);
         } else {
             return m(".petitions", [
-                m("h1", "Erreur quatre cent quatre"),
-                m("p", "Cette page n'existe pas, vous êtes perdu ? Suivez le guide :"),
-                m("a", {href: "https://fr.wikipedia.org/wiki/Le_Guide_du_voyageur_galactique"},"Le Guide du voyageur galactique"),
+                m("h1", "Ça arrive !"),
+                m("p", "Nous avons assignés tous nos nains de recherche à votre requête, ils cherchent !"),
+                m("img", {src: "https://upload.wikimedia.org/wikipedia/commons/d/d0/7_garden_gnomes.jpg", alt:"Image de nain"}),
+                m("p", "* Photo non contractuelle"),
             ]); 
         }
     }
@@ -615,14 +616,9 @@ var SearchView = {
             type: SearchView.searchType,
         };
         console.log(search);
-        /*return m.request({
-            method: "GET",
-            url: "",
-            params: "",
-        })
-        .then(function(result) {
-
-        })*/
+        m.route.set("/search/:type/:text/:id", {type: search.type, text: search.text, id: "1"});
+        SearchView.searchText = "";
+        SearchView.searchType = "1";
     },
   
     view: function () {

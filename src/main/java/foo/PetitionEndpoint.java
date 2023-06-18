@@ -262,4 +262,28 @@ public class PetitionEndpoint {
         }
         return petitionEntity;
 	 }
+
+     @ApiMethod(name = "searchPetition", httpMethod = HttpMethod.GET)
+     public List<Entity> searchPetition(PostMessage pm) {
+        String type = pm.type;
+        String recherche = pm.searchText;
+        int page = Integer.parseInt(pm.page);
+
+        int index = (page - 1) * 50;
+        List<Entity> result;
+        Query query;
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        if(type.equals("1")) {
+            query = new Query("Petition").setFilter(new Query.FilterPredicate("tags",
+            Query.FilterOperator.EQUAL, recherche));
+        } else {
+            query = new Query("Petition").setFilter(new Query.FilterPredicate("nom",
+            Query.FilterOperator.EQUAL, recherche));
+        }
+        
+        PreparedQuery pq = datastore.prepare(query);
+        result = pq.asList(FetchOptions.Builder.withOffset(index).limit(50));
+
+        return result; 
+     }
 }
